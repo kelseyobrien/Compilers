@@ -5,7 +5,7 @@
 //Token constants
 
 const T_INT			= 'T_INT';
-const T_STRING			= 'T_STR';
+const T_STRING		= 'T_STR';
 const T_DIGIT		= 'T_DIGIT';
 const T_CHAR		= 'T_CHAR';
 const T_BOOLEAN		= 'T_BOOLEAN';
@@ -31,7 +31,7 @@ const T_NEWLINE		= 'T_NEWLINE';
 //Regular Expressions associated with each Token
 
 const R_INT			= /^int/;
-const R_STRING			= /^string/;
+const R_STRING		= /^string/;
 const R_DIGIT		= /^[0-9]/;
 const R_CHAR		= /^[a-zA-Z]/;
 const R_BOOLEAN		= /^boolean/;

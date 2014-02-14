@@ -1,18 +1,100 @@
 /* lexer.js  */
 
-function lex()
-    {
-        // Grab the "raw" source code.
-        var sourceCode = document.getElementById("taSourceCode").value;
-        // Trim the leading and trailing spaces.
-        sourceCode = trim(sourceCode);
-		
-        // TODO: remove all spaces in the middle; remove line breaks too.
-		function getToken(token)
-		{
-			return Tokens[this.type];
-		}
-		
+function Lexer(sourceCode)
+{
+	//Information to keep track of throughout the process	
+	var currentLine = 1;
+	var errors = new Array();
+	var inQuotes = false;
+	
+	//Start lex process
+	return lex(sourceCode);
+	
+	//Lex process
+	function lex(sourceCode){
+		var tokenType = getToken(sourceCode);
+		var length = getTokenLength(tokenType);
 
-        return sourceCode;
-    }
+		//Remove found token from source code
+		var updatedSource = sourceCode.substr(length);
+	
+		//New token to be used throughout process
+		var tokenTemp = new Token();
+		
+		switch(tokenType) {
+			case T_NEWLINE:
+				currentLine++;
+			//break;
+			case T_SPACE:
+				//If in quotes get value of string
+				if(inQuotes){
+					token.type = tokenType;
+					token.line = currentLine;
+					token.value = sourceCode.substr(0, length);
+				}
+				else {
+						return lex(updatedSource);
+				}
+			break;
+			case T_QUOTE:
+				if(inQuotes){
+					inQuotes = false;
+				}
+				else{
+					inQuotes = true;
+				}
+			break;
+			case null:
+				//var error = 'Unknown Toek at line ' + currentLine + ' ' + sourceCode[0];
+				alert(error);
+			break;
+			default:
+				token.type = tokenType;
+				token.line = currentLine;
+				token.value = sourceCode.substr(0, length);
+			}
+			
+			//Return array of tokens
+			if(updatedSource > 0){
+				return new Array(token).concat(lex(updatedSource));
+			}
+			else{
+				return new Array(token);
+			}
+	}	
+	//Helper Functions
+	
+	//Function to get token from Tokens array if valid
+	function getToken(sourceCode)
+	{
+		for (token in Tokens){
+			if(inQuotes && Tokens[token].length > 1){
+				continue;
+			}
+			var regularExpr = Tokens[token].regex;
+			try{
+				if(regularExpr.test(sourceCode)){
+					putMessage("Found Token :" + token);
+					return token;
+				}
+			}
+			catch(e){
+				return null;
+			}
+		}
+		//No valid tokens found
+		return null;
+	}
+
+	//Function to get Token length or return 1 if token not found
+	function getTokenLength(tokenType)
+	{
+		if(tokenType in Tokens){
+			return Tokens[tokenType].length;
+		}
+		else{
+			return 1;
+		}
+	}
+
+}

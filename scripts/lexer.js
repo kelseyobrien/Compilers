@@ -28,13 +28,17 @@ function Lexer(sourceCode)
 			case T_SPACE:
 				//If in quotes get value of string
 				if(inQuotes){
-					token.type = tokenType;
-					token.line = currentLine;
-					token.value = sourceCode.substr(0, length);
+					tokenTemp.type = tokenType;
+					tokenTemp.line = currentLine;
+					tokenTemp.value = sourceCode.substr(0, length);
 				}
 				else {
 						return lex(updatedSource);
 				}
+			break;
+			case null:
+				putMessage('Unknown Token --> '+ sourceCode[0] + ' <-- at line ' + currentLine);
+				
 			break;
 			case T_QUOTE:
 				if(inQuotes){
@@ -43,23 +47,18 @@ function Lexer(sourceCode)
 				else{
 					inQuotes = true;
 				}
-			break;
-			case null:
-				//var error = 'Unknown Toek at line ' + currentLine + ' ' + sourceCode[0];
-				alert(error);
-			break;
 			default:
-				token.type = tokenType;
-				token.line = currentLine;
-				token.value = sourceCode.substr(0, length);
+				tokenTemp.type = tokenType;
+				tokenTemp.line = currentLine;
+				tokenTemp.value = sourceCode.substr(0, length);
 			}
 			
 			//Return array of tokens
-			if(updatedSource > 0){
+			if(updatedSource.length > 0){
 				return new Array(token).concat(lex(updatedSource));
 			}
 			else{
-				return new Array(token);
+				return new Array(tokenTemp);
 			}
 	}	
 	//Helper Functions
@@ -95,6 +94,11 @@ function Lexer(sourceCode)
 		else{
 			return 1;
 		}
+	}
+	
+	function getErrors()
+	{
+		return errors;
 	}
 
 }

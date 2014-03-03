@@ -8,7 +8,9 @@ function Lexer(sourceCode)
 	var inQuotes = false;
 	
 	//Start lex process
-	return lex(sourceCode);
+	var allTokens = new Array();
+	allTokens = lex(sourceCode);
+	return allTokens;
 	
 	//Lex process
 	function lex(sourceCode){
@@ -24,7 +26,6 @@ function Lexer(sourceCode)
 		switch(tokenType) {
 			case T_NEWLINE:
 				currentLine++;
-			//break;
 			case T_SPACE:
 				//If in quotes get value of string
 				if(inQuotes){

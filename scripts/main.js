@@ -33,12 +33,12 @@
 		}
 		else{
 			putMessage("Compilation Started");
-			var tokenStream = Lexer(sourceCode);
+			tokens = Lexer(sourceCode);
 			putMessage("Lex returned.");
 			}
         // . . . and parse!
 		
-        //parse();
+        Parser(tokens);
     }
     
     function putMessage(msg)
@@ -53,12 +53,12 @@
         // Grab the next token.
         currentToken = getNextToken();
         // A valid parse derives the G(oal) production, so begin there.
-        parseG();
+        //parseG();
         // Report the results.
-        putMessage("Parsing found " + errorCount + " error(s).");        
+        //putMessage("Parsing found " + errorCount + " error(s).");        
     }
     
-    function parseG()
+    /*function parseG()
     {
         // A G(oal) production can only be an E(xpression), so parse the E production.
         parseE();
@@ -120,7 +120,7 @@
         // Consume another token, having just checked this one, because that 
         // will allow the code to see what's coming next... a sort of "look-ahead".
         currentToken = getNextToken();
-    }
+    }*/
 
     function getNextToken()
     {

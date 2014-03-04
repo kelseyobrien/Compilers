@@ -56,7 +56,7 @@ function Lexer(sourceCode)
 			
 			//Return array of tokens
 			if(updatedSource.length > 0){
-				return new Array(token).concat(lex(updatedSource));
+				return new Array(tokenTemp).concat(lex(updatedSource));
 			}
 			else{
 				return new Array(tokenTemp);

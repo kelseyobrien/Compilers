@@ -83,6 +83,12 @@ function Parser(tokenStream){
 	
 	//If statement -- if booleanExpr Block
 	function ifStatement(){
+		if(checkToken(T_IF) && parseBooleanExpr() ){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 	
 	//Block -- { StatmentList }

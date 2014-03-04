@@ -1,6 +1,6 @@
 //Class to represent a single symbol to be used in the symbol table
 
-function Symbol(tokenID, tokenType){
+var Symbol = function(tokenID, tokenType){
 	this.used = false;
 	this.initialized = false;
 	
@@ -8,7 +8,7 @@ function Symbol(tokenID, tokenType){
         writeable       : false,
         enumerable      : false,
         get             : function() {
-            return idToken.value;
+            return tokenID.value;
         }
     });
     
@@ -16,7 +16,7 @@ function Symbol(tokenID, tokenType){
         writeable       : false,
         enumerable      : false,
         get             : function() {
-            return typeToken.type;
+            return tokenType.type;
         }
     });
     
@@ -24,8 +24,7 @@ function Symbol(tokenID, tokenType){
         writeable       : false,
         enumerable      : false,
         get             : function() {
-            return idToken.line;
+            return tokenID.line;
         }
-	}
-	}};
+	});
 }

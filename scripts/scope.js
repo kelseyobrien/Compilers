@@ -45,7 +45,7 @@ function Scope(parent){
 				current = current.parent;
 			}
 			else{
-				worker = null;
+				current = null;
 			}
 		}
 		return false;

@@ -1,7 +1,9 @@
 function Parser(tokenStream){
 
 	var lastToken;
+	var symbolTable = new SymbolTable();
 	var results = parseProgram();
+	
 
 	
 	function parseProgram(){
@@ -69,11 +71,24 @@ function Parser(tokenStream){
 	
 	//Variable declaration -- type Id
 	function varDecl(){
+		var tokenType = tokenStream[0];
+		var tokenID = tokenStream[1];
+		
+		if(parseType() && parseId('declared')){
+			if(! symbolTable.addIdentifier(tokenID, tokenType)){
+				putMessage("Redeclaration of Identifier: " + tokenID.value + " at line "+ tokenID.line);
+			}
+		return true;
+		}
+		else{
+			return false;
+		}
+		
 	}
 	
 	//While statement -- while booleanExprBlock
 	function whileStatement(){
-		if(checkToken(T_WHILE) && parseBooleanExpr() ){
+		if(checkToken(T_WHILE) && parseBooleanExpr() && block() ){
 			return true;
 		}
 		else{
@@ -83,7 +98,7 @@ function Parser(tokenStream){
 	
 	//If statement -- if booleanExpr Block
 	function ifStatement(){
-		if(checkToken(T_IF) && parseBooleanExpr() ){
+		if(checkToken(T_IF) && parseBooleanExpr() && block()){
 			return true;
 		}
 		else{
@@ -93,11 +108,38 @@ function Parser(tokenStream){
 	
 	//Block -- { StatmentList }
 	function block(){
+		symbolTable.openScope();
+		if(checkToken(T_OPENBRACE) && parseStatementList() 
+			&& checkToken(T_CLOSEBRACE)){
+			symbolTable.closeScope();
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 	
 	//Statement list -- Statement StatementList
 	function parseStatementList(){
-		//Statement StatementList
+		//Check to see if ai this is a statement
+		//If so parse it
+		//If not return true since can go to epsilon
+		switch(getTokenType()){
+			case T_PRINT:
+			case T_CHAR:
+			case T_INT:
+			case T_STRING:
+			case T_BOOLEAN:
+			case T_OPENBRACE:
+			case T_WHILE:
+			case T_IF:
+				parseStatement();
+				return parseStatementList();
+			break;
+			default:
+				return true;	
+		}
+		return true;
 	}
 	
 	//Checks for expression
@@ -112,6 +154,15 @@ function Parser(tokenStream){
 			case T_FALSE:
 				return parseBooleanExpr();
 			break;
+			case T_QUOTE:
+				return parseStrExpr();
+			break;
+			//Pass 'used' becuase Id should already be declared
+			case T_CHAR:
+				return parseId('used');
+			break;
+			default:
+				return false;
 		}
 		return false;
 	}
@@ -176,6 +227,93 @@ function Parser(tokenStream){
 		}
 	}
 	
+	function parseStrExpr(){
+		if(parseQuote() && parseCharList() && parseQuote()){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function parseQuote(){
+		if(checkToken(T_QUOTE)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function parseCharList(){
+		//If type = character or space try to parse it
+		//If not return true since can go to epsilon
+		switch(getTokenType()){
+			case T_CHAR:
+				if(parseChar()){
+					return parseCharList();
+				}
+				else{
+					return false;
+				}
+			break;
+			case T_SPACE:
+				if(parseSpace()){
+					return parseCharList();
+				}
+				else{
+					return false;
+				}
+				break;		
+		}
+		return true;
+	}
+	
+	function parseType(){
+		if(checkToken(T_INT) || checkToken(T_STRING) || checkToken(T_BOOLEAN)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function parseId(status){
+		if(status !== 'declared'){
+			var id = getTokenValue();
+			if(! symbolTable.workingScope.hasId(id, true)){
+				putMessage("Undeclared identifier " + id + " at line "+ getTokenLine());
+			}
+			else if(status === 'initialized'){
+				symbolTable.workingScope.initializedSymbol(id);
+			}
+			else if(status === 'used'){
+				symbolTable.workingScope.usedSymbol(id);
+			}
+		}
+		return parseChar();
+		
+	}
+	
+	function parseChar(){
+		if(checkToken(T_CHAR)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function parseInt(){
+		if(checkToken(T_DIGIT)){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	
 	//Function to parse ops (+ | -)
 	function parseOp(){
 		if(checkToken(T_PLUS) || checkToken(T_MINUS)){
@@ -183,6 +321,15 @@ function Parser(tokenStream){
 		}
 		else{
 			return false;
+		}
+	}
+	
+	function parseSpace(){
+		if(checkToken(T_SPACE)){
+			return true;
+		}
+		else{
+			return true;
 		}
 	}
 	
@@ -205,6 +352,10 @@ function Parser(tokenStream){
 				return false;
 			}
 		}
+		else if(currentTokenType != type){
+			expectedTokenError(type);
+			return false;
+		}
 		
 		return false;
 	}
@@ -225,5 +376,34 @@ function Parser(tokenStream){
 			return true;
 		}
 		return false;
+	}
+	
+	function getTokenValue(){
+		if(tokenStream.length > 0){
+			return tokenStream[0].value;
+		}
+		else if(lastToken !== undefined){
+			return lastToken.value;
+		}
+		else{
+			return '';
+		}
+	}
+	
+	function getTokenLine(){
+		if(tokenStream.length > 0){
+			return tokenStream[0].line;
+		}
+		else if(lastToken !== undefined){
+			return lastToken.line;
+		}
+		else{
+			return 'Last line.';
+		}
+	}
+	
+	function expectedTokenError(type){
+		putMessage("Expected: " + type + " Found: " +getTokenType()); 
+		
 	}
 }

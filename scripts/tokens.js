@@ -91,4 +91,5 @@ var Token = function() {
 	this.type = null;
 	this.line = -1;
 	this.value = '';
+	
 };

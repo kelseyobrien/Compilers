@@ -11,4 +11,14 @@ function SymbolTable(){
 	this.closeScope = function(){
 		this.workingScope.parent;
 	}
+	
+	this.addIdentifier = function(id, type){
+		var symbol = new Symbol(id, type);
+		var symToAdd = this.workingScope.addSymbol(symbol);
+		
+		if(symToAdd){
+			putMessage("Identifier: " + symbol.id + " | " + symbol.type + ' on line ' + symbol.line);
+		}
+		return symToAdd;
+	}
 }

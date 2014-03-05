@@ -66,7 +66,13 @@ function Parser(tokenStream){
 	
 	//Assignment Statement -- Id = Expr
 	function assignmentStatement(){
-		//if(parseId
+		if(parseId('initialized') && checkToken(T_EQUAL)
+			&& parseExpr()){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 	
 	//Variable declaration -- type Id
@@ -210,13 +216,17 @@ function Parser(tokenStream){
 	
 	function boolExpr(){
 		if(checkToken(T_OPENPAREN) && parseExpr()
-			&& checkToken(T_EQUALITY) && parseExpr() && checkToken(T_CLOSEPAREN)){
+			&& parseBoolOp() && parseExpr() && checkToken(T_CLOSEPAREN)){
 				return true;
 			}
 		else{
 			return false;
 		}
 	}
+	
+	function parseBoolOp(){
+	}
+	
 	
 	function boolVal(){
 		if(checkToken(T_TRUE) || checkToken(T_FALSE)){
@@ -359,6 +369,27 @@ function Parser(tokenStream){
 		
 		return false;
 	}
+	
+	/*//Function to check multiple tokens at once
+	//Tried to use or operator to check in specific functions
+	// but it makes the output messy and annoying
+	function checkMultipleTokens(types){
+		for(var index in types){
+			var type = types[index];
+			var currentTokenType = getTokenType();
+			
+			if(currentTokenType === type){
+				putMessage("Found " + type);
+				if(acceptToken()){
+					putMessage("Token accepted!");
+					return true;
+				}
+			}
+		
+		//If it gets to here then valid token not found
+		expectedTokenError(types.join("|"));
+		return false;
+	}*/
 	
 	//Function to get type of token
 	function getTokenType(){

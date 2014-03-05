@@ -5,7 +5,7 @@
 //Token constants
 
 const T_INT			= 'T_INT';
-const T_STRING		= 'T_STR';
+const T_STRING		= 'T_STRING';
 const T_DIGIT		= 'T_DIGIT';
 const T_CHAR		= 'T_CHAR';
 const T_BOOLEAN		= 'T_BOOLEAN';
@@ -20,6 +20,7 @@ const T_WHILE		= 'T_WHILE';
 const T_PRINT		= 'T_PRINT';
 const T_EQUAL		= 'T_EQUAL';
 const T_EQUALITY	= 'T_EQUALITY';
+const T_NOTEQUAL	= 'T_NOTEQUAL';
 const T_QUOTE		= 'T_QUOTE';
 const T_PLUS		= 'T_PLUS';
 const T_MINUS		= 'T_MINUS';
@@ -46,6 +47,7 @@ const R_WHILE		= /^while/;
 const R_PRINT		= /^print/;
 const R_EQUAL		= /^[=]/;
 const R_EQUALITY	= /^==/;
+const R_NOTEQUAL	= /^!=/;
 const R_QUOTE		= /^["|']/;
 const R_PLUS		= /^[+]/;
 const R_MINUS		= /^[-]/;
@@ -77,6 +79,7 @@ var Tokens = {
 	T_CLOSEPAREN: { regex: R_CLOSEPAREN, length: 1},
 	T_EQUALITY	: { regex: R_EQUALITY, length: 2},
 	T_EQUAL		: { regex: R_EQUAL,	length: 1},
+	T_NOTEQUAL	: { regex: R_NOTEQUAL, length: 2},
 	T_QUOTE		: { regex: R_QUOTE,	length: 1},
 	T_PLUS		: { regex: R_PLUS, length: 1},
 	T_MINUS		: { regex: R_MINUS, length: 1},

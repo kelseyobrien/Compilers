@@ -117,3 +117,11 @@
 	function btnParseError(){
 		document.getElementById("taSourceCode").value = "{\n    string b\n    b = \"this 1s a t35t\"\n}\n$";
 	}
+	
+	function btnParseError2(){
+		document.getElementById("taSourceCode").value = "{\n    print(\"start 0f example\")\n    int a\n    string b\n\n    a = a + 4 + 5\n    a = 1 + a\n\n    b = \"string\"\n  }\n \n$";
+	}
+	
+	function btnRedecErr(){
+		document.getElementById("taSourceCode").value = "{\n    int a\n    a = 1\n    a = 5 + a\n\n    string a\n}\n$";
+	}

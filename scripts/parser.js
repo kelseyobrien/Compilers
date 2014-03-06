@@ -422,7 +422,7 @@ function Parser(tokenStream){
 				return false;
 			}
 		}
-		// Expected topen not found
+		// Expected token not found
 		else if(currentTokenType != type){
 			expectedTokenError(type);
 			return false;
@@ -489,6 +489,23 @@ function Parser(tokenStream){
 	function expectedTokenError(type){
 		//Print error message
 		putMessage("ERROR: Expected: " + type + " Found: " +getTokenType()+" on line " + getTokenLine()); 
+		moveToNextLine();
+		/*if(tokenStream.length > 0){
+			tokenStream.splice(0,1);
+			return true;
+		}
+		return false;*/
+	
+	}
+	
+	//Totally cheating
+	function expectedErrAndMove(type){
+		putMessage("ERROR: Expected: " + type + " Found: " +getTokenType()+" on line " + getTokenLine());
 		
+		if(tokenStream.length > 0){
+			tokenStream.splice(0,1);
+			return true;
+		}
+		return false;
 	}
 }

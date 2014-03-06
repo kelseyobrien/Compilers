@@ -83,11 +83,11 @@
 		document.getElementById("taSourceCode").value = "{\n    !@#%^&*()_\n}\n$";
 	}
 	function btnDecVar1(){
-		document.getElementById("taSourceCode").value = "int a\n$";
+		document.getElementById("taSourceCode").value = "{\nint a \n}\n$";
 	}
 	
 	function btnDecVarErr(){
-		document.getElementById("taSourceCode").value = "string 1\n$";
+		document.getElementById("taSourceCode").value = "{\n string 1 \n}\n$";
 	}
 	
 	function btnStmnt(){

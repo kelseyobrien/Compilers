@@ -33,12 +33,18 @@
 		}
 		else{
 			putMessage("Compilation Started");
+			putMessage("--------------------");
+			putMessage("Lex started");
 			tokens = Lexer(sourceCode);
+			putMessage("--------------------");
 			putMessage("Lex returned.");
 			}
         // . . . and parse!
-		
-        Parser(tokens);
+		if(errorCount == 0){
+			putMessage("--------------------");
+			putMessage("Parse Started");
+			Parser(tokens);
+		}
     }
     
     function putMessage(msg)

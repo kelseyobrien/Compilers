@@ -23,7 +23,6 @@ const T_EQUALITY	= 'T_EQUALITY';
 const T_NOTEQUAL	= 'T_NOTEQUAL';
 const T_QUOTE		= 'T_QUOTE';
 const T_PLUS		= 'T_PLUS';
-const T_MINUS		= 'T_MINUS';
 const T_SPACE		= 'T_SPACE';
 const T_EOF			= 'T_EOF';
 const T_EPSILON		= 'T_EPSILON';
@@ -50,7 +49,6 @@ const R_EQUALITY	= /^==/;
 const R_NOTEQUAL	= /^!=/;
 const R_QUOTE		= /^["|']/;
 const R_PLUS		= /^[+]/;
-const R_MINUS		= /^[-]/;
 const R_SPACE		= /^\s/;
 const R_EOF			= /^[$]/;
 const R_NEWLINE		= /^(\n)(\r)?/;
@@ -81,8 +79,6 @@ var Tokens = {
 	T_EQUAL		: { regex: R_EQUAL,	length: 1},
 	T_NOTEQUAL	: { regex: R_NOTEQUAL, length: 2},
 	T_QUOTE		: { regex: R_QUOTE,	length: 1},
-	T_PLUS		: { regex: R_PLUS, length: 1},
-	T_MINUS		: { regex: R_MINUS, length: 1},
 	T_NEWLINE	: { regex: R_NEWLINE, length: 1},
 	T_SPACE		: { regex: R_SPACE, length: 1},
 	T_EOF		: { regex: R_EOF, length: 1}

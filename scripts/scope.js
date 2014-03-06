@@ -54,7 +54,7 @@ function Scope(parent){
 	//Check to see if specified id has already been used
 	//Search entire symbol table
 	this.usedSymbol = function(id){
-		var symbol = getSymbol(id, true);
+		var symbol = this.getSymbol(id, true);
 		if(symbol != false){
 			symbol.used = true;
 		}

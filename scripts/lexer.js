@@ -38,6 +38,7 @@ function Lexer(sourceCode)
 				}
 			break;
 			case null:
+				errorCount++;
 				putMessage('Unknown Token --> '+ sourceCode[0] + ' <-- at line ' + currentLine);
 				
 			break;

@@ -17,22 +17,33 @@ E ::== D O E | D
 D ::== 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0
 O ::== + | -
     </pre>
-    <div>
-        <img style="float:right;" src="images/CompilerPhases.png" alt="Compiler Phases diagram" />
-    </div>    
-    <div>
-        <textarea id="taSourceCode" cols="32" rows="18"></textarea>
-        <br>
-        <input type="button" id="btnCompile" value="Compile" onclick="btnCompile_click();"/>
-        <br>
-        <textarea id="taOutput" cols="32" rows="18"></textarea>
-    </div>
-    <!-- Footer -->
-    <p>
-        <a href="http://validator.w3.org/check?uri=referer">
-            <img src="images/w3cvalidhtml5.jpg" alt="Valid HTML5" width="88" height="31" />
-        </a>
-    </p>
+	<table>
+		<tr>
+			<td>
+				<div>
+					<textarea id="taSourceCode" cols="50" rows="18"></textarea>
+				</div>
+			</td>
+			<td>
+				<div>
+					<textarea id="taOutput" cols="50" rows="18"></textarea>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div>
+					<input type="button" id="btnCompile" value="Compile" onclick="btnCompile_click();"/>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div>
+					<img src="images/CompilerPhases.png" alt="Compiler Phases diagram" />
+				</div>
+			</td>
+		<tr>
     <!-- Client-side code down here, per the YSlow advice. 
     // (http://developer.yahoo.com/performance/rules.html#js_bottom) -->
     <script type="text/javascript" src="scripts/utils.js"></script>	

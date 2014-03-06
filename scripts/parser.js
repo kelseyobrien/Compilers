@@ -21,9 +21,11 @@ function Parser(tokenStream){
 		}
 		else{
 			putMessage("Warning: Program did not end with $.");
+			putMessage("Ignoring...but don't let it happen again.");
 		}
 	}
 	
+	//Determine which statement to parse
 	function parseStatement(){
 		var type = getTokenType();
 		switch(type){
@@ -84,7 +86,7 @@ function Parser(tokenStream){
 			if(! symbolTable.addIdentifier(tokenID, tokenType)){
 				putMessage("Redeclaration of Identifier: " + tokenID.value + " at line "+ tokenID.line);
 			}
-		return true;
+			return true;
 		}
 		else{
 			return false;
@@ -148,12 +150,12 @@ function Parser(tokenStream){
 		return true;
 	}
 	
-	//Checks for expression
+	//Checks for the different expressions
 	function parseExpr(){
 		var type = getTokenType();
 		switch(type){
 			case T_DIGIT:
-				return parseIntExpr();
+				return parseDigitExpr();
 			break;
 			case T_OPENPAREN:
 			case T_TRUE:
@@ -164,6 +166,7 @@ function Parser(tokenStream){
 				return parseStrExpr();
 			break;
 			//Pass 'used' becuase Id should already be declared
+			//Really should be a global variable
 			case T_CHAR:
 				return parseId('used');
 			break;
@@ -174,13 +177,15 @@ function Parser(tokenStream){
 	}
 	
 	
-	function parseIntExpr(){
+	//Parse integer expressions
+	// digit intop Expr
+	// or just digit
+	function parseDigitExpr(){
 		var digitToken = tokenStream[0];
 		if (checkToken(T_DIGIT)){
 			//Look ahead to see if there is an operator following
 			switch(getTokenType()){
 				case T_PLUS:
-				case T_MINUS:
 					return parseSubIntExpr();
 				break;
 			}
@@ -205,15 +210,16 @@ function Parser(tokenStream){
 	//(Expr boolop Expr) or boolval
 	function parseBooleanExpr(){
 		//If expression starts w/ ( --> boolean expression
-		//else boolval
 		if(getTokenType() == T_OPENPAREN){
 			return boolExpr();
 		}
+		//else boolval
 		else{
 			return boolVal();
 		}
 	}
 	
+	//Parse boolean expression ( Expr boolop Expr)
 	function boolExpr(){
 		if(checkToken(T_OPENPAREN) && parseExpr()
 			&& parseBoolOp() && parseExpr() && checkToken(T_CLOSEPAREN)){
@@ -224,19 +230,45 @@ function Parser(tokenStream){
 		}
 	}
 	
+	//Parse possible boolean operations == or !=
 	function parseBoolOp(){
+		switch(getTokenType()){
+			case T_EQUALITY:
+				if(checkToken(T_EQUALITY)){
+					return true;
+				}
+			break;
+			case T_NOTEQUAL:
+				if(checkToken(T_NOTEQUAL)){
+					return true;
+				}
+			break;
+			default:
+				return false;
+			}
+		return false;
 	}
 	
-	
+	//Parse boolean values true or false
 	function boolVal(){
-		if(checkToken(T_TRUE) || checkToken(T_FALSE)){
-			return true;
+		switch(getTokenType()){
+			case T_TRUE:
+				if(checkToken(T_TRUE)){
+					return true;
+				}
+			break;
+			case T_FALSE:
+				if(checkToken(T_FALSE)){
+					return true;
+				}
+			default:
+				putMessage("Error expecting boolean value on line " + getTokenLine());
+				return false;
 		}
-		else{
-			return false;
-		}
+		return false;
 	}
 	
+	//Parse string expression " Charlist "
 	function parseStrExpr(){
 		if(parseQuote() && parseCharList() && parseQuote()){
 			return true;
@@ -246,6 +278,7 @@ function Parser(tokenStream){
 		}
 	}
 	
+	//Pase quotation marks
 	function parseQuote(){
 		if(checkToken(T_QUOTE)){
 			return true;
@@ -255,6 +288,10 @@ function Parser(tokenStream){
 		}
 	}
 	
+	//Parse Charlist
+	//char Charlist
+	//space Charlist
+	//or epsilon
 	function parseCharList(){
 		//If type = character or space try to parse it
 		//If not return true since can go to epsilon
@@ -279,32 +316,52 @@ function Parser(tokenStream){
 		return true;
 	}
 	
+	//Parse possible types int string or boolean
 	function parseType(){
-		if(checkToken(T_INT) || checkToken(T_STRING) || checkToken(T_BOOLEAN)){
-			return true;
+		switch(getTokenType()){
+			case T_INT:
+				if(checkToken(T_INT)){
+					return true;
+				}
+			break;
+			case T_STRING:
+				if(checkToken(T_STRING)){
+					return true;
+				}
+			break;
+			case T_BOOLEAN:
+				if(checkToken(T_BOOLEAN)){
+					return true;
+				}
+			break;
+			default:
+				return false;
 		}
-		else{
-			return false;
-		}
+		return false;
 	}
 	
+	//Parse id
+	//Status passed in depends how function is called
 	function parseId(status){
+		//Check if id has even been declared
 		if(status !== 'declared'){
 			var id = getTokenValue();
 			if(! symbolTable.workingScope.hasId(id, true)){
 				putMessage("Undeclared identifier " + id + " at line "+ getTokenLine());
 			}
-			else if(status === 'initialized'){
-				symbolTable.workingScope.initializedSymbol(id);
+			
+			//id is valid
+			if(status === 'initialized'){
+				symbolTable.workingScope.isInitialized(id);
 			}
 			else if(status === 'used'){
 				symbolTable.workingScope.usedSymbol(id);
 			}
 		}
-		return parseChar();
-		
+		return parseChar();	
 	}
-	
+
+	//Parse char a...z
 	function parseChar(){
 		if(checkToken(T_CHAR)){
 			return true;
@@ -314,7 +371,8 @@ function Parser(tokenStream){
 		}
 	}
 	
-	function parseInt(){
+	//Parse digit 0 - 9
+	function parseDigit(){
 		if(checkToken(T_DIGIT)){
 			return true;
 		}
@@ -324,9 +382,9 @@ function Parser(tokenStream){
 	}
 	
 	
-	//Function to parse ops (+ | -)
+	//Function to parse op +
 	function parseOp(){
-		if(checkToken(T_PLUS) || checkToken(T_MINUS)){
+		if(checkToken(T_PLUS)){
 			return true;
 		}
 		else{
@@ -334,6 +392,7 @@ function Parser(tokenStream){
 		}
 	}
 	
+	//Parse space character
 	function parseSpace(){
 		if(checkToken(T_SPACE)){
 			return true;
@@ -345,7 +404,7 @@ function Parser(tokenStream){
 	
 	//Helper Functions
 	
-	
+	//Check expected token against what is actually found
 	function checkToken(type){
 		putMessage("Expecting " + type);
 		
@@ -353,7 +412,7 @@ function Parser(tokenStream){
 		var currentTokenType = getTokenType();
 		if(currentTokenType === type){
 			putMessage("Found " + type);
-			
+			//If expected token found accept it
 			if(acceptToken()){
 				putMessage("Token accepted!");
 				return true;
@@ -362,6 +421,7 @@ function Parser(tokenStream){
 				return false;
 			}
 		}
+		// Expected topen not found
 		else if(currentTokenType != type){
 			expectedTokenError(type);
 			return false;
@@ -369,27 +429,6 @@ function Parser(tokenStream){
 		
 		return false;
 	}
-	
-	/*//Function to check multiple tokens at once
-	//Tried to use or operator to check in specific functions
-	// but it makes the output messy and annoying
-	function checkMultipleTokens(types){
-		for(var index in types){
-			var type = types[index];
-			var currentTokenType = getTokenType();
-			
-			if(currentTokenType === type){
-				putMessage("Found " + type);
-				if(acceptToken()){
-					putMessage("Token accepted!");
-					return true;
-				}
-			}
-		
-		//If it gets to here then valid token not found
-		expectedTokenError(types.join("|"));
-		return false;
-	}*/
 	
 	//Function to get type of token
 	function getTokenType(){
@@ -409,6 +448,7 @@ function Parser(tokenStream){
 		return false;
 	}
 	
+	//Get value of specific token
 	function getTokenValue(){
 		if(tokenStream.length > 0){
 			return tokenStream[0].value;
@@ -421,6 +461,7 @@ function Parser(tokenStream){
 		}
 	}
 	
+	//Get the line of specific token
 	function getTokenLine(){
 		if(tokenStream.length > 0){
 			return tokenStream[0].line;
@@ -433,8 +474,22 @@ function Parser(tokenStream){
 		}
 	}
 	
+	//In case of expected error move to the next line
+	function moveToNextLine(){
+		if(tokenStream.length > 0){
+			var currentLine = getTokenLine();
+			while(currentLine == getTokenLine()){
+				acceptToken();
+			}
+		}
+	}
+	
+	//Handle expected token errors
 	function expectedTokenError(type){
-		putMessage("Expected: " + type + " Found: " +getTokenType()); 
+		//Discard rest of the line in case of an expected error
+		moveToNextLine();
+		//Print error message
+		putMessage("ERROR: Expected: " + type + " Found: " +getTokenType()+" on line " + getTokenLine()); 
 		
 	}
 }

@@ -6,10 +6,16 @@ function SymbolTable(){
 		var newScope = new Scope(this.workingScope);
 		this.workingScope.subScopes.push(newScope);
 		this.workingScope = newScope;
+		putMessage("------------");
+		putMessage("Opened Scope");
+		putMessage("------------");
 	}
 	
 	this.closeScope = function(){
 		this.workingScope.parent;
+		putMessage("------------");
+		putMessage("Closed Scope");
+		putMessage("------------");
 	}
 	
 	this.addIdentifier = function(id, type){

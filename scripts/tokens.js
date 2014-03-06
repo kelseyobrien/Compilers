@@ -79,6 +79,7 @@ var Tokens = {
 	T_EQUAL		: { regex: R_EQUAL,	length: 1},
 	T_NOTEQUAL	: { regex: R_NOTEQUAL, length: 2},
 	T_QUOTE		: { regex: R_QUOTE,	length: 1},
+	T_PLUS		: { regex: R_PLUS, length: 1},
 	T_NEWLINE	: { regex: R_NEWLINE, length: 1},
 	T_SPACE		: { regex: R_SPACE, length: 1},
 	T_EOF		: { regex: R_EOF, length: 1}

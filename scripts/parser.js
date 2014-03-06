@@ -347,6 +347,7 @@ function Parser(tokenStream){
 		if(status !== 'declared'){
 			var id = getTokenValue();
 			if(! symbolTable.workingScope.hasId(id, true)){
+				moveToNextLine();
 				putMessage("Undeclared identifier " + id + " at line "+ getTokenLine());
 			}
 			
@@ -398,7 +399,7 @@ function Parser(tokenStream){
 			return true;
 		}
 		else{
-			return true;
+			return false;
 		}
 	}
 	
@@ -486,8 +487,6 @@ function Parser(tokenStream){
 	
 	//Handle expected token errors
 	function expectedTokenError(type){
-		//Discard rest of the line in case of an expected error
-		moveToNextLine();
 		//Print error message
 		putMessage("ERROR: Expected: " + type + " Found: " +getTokenType()+" on line " + getTokenLine()); 
 		

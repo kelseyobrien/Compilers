@@ -7,7 +7,7 @@ function Parser(tokenStream){
 
 	
 	function parseProgram(){
-		if(!parseStatement()){
+		if(!block()){
 			return false;
 		}
 		

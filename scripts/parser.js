@@ -346,10 +346,10 @@ function Parser(tokenStream){
 		//Check if id has even been declared
 		if(status !== 'declared'){
 			var id = getTokenValue();
-			if(! symbolTable.workingScope.hasId(id, true)){
-				moveToNextLine();
-				putMessage("Undeclared identifier " + id + " at line "+ getTokenLine());
-			}
+			//if(! symbolTable.workingScope.hasId(id, true)){
+				//moveToNextLine();
+				//putMessage("Undeclared identifier " + id + " at line "+ getTokenLine());
+			//}
 			
 			//id is valid
 			if(status === 'initialized'){

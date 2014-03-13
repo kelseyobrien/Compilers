@@ -7,6 +7,23 @@ function Lexer(sourceCode)
 	var errors = new Array();
 	var inQuotes = false;
 	
+	var foundEOF = false;
+	var codeAfterEOF = false;
+	
+	for(var x = 0; x < sourceCode.length; x++){
+		
+		if(foundEOF){
+			codeAfterEOF = true;
+		}
+		if(sourceCode.charAt(x) == "$"){
+			foundEOF = true;
+		}
+	}
+	
+	if(foundEOF && codeAfterEOF){
+		putMessage("Warning: Code found after EOF marker...ignoring");
+	}
+	
 	//Start lex process
 	var allTokens = new Array();
 	allTokens = lex(sourceCode);

@@ -39,6 +39,7 @@
 			putMessage("--------------------");
 			putMessage("Lex returned.");
 			}
+			
         // . . . and parse!
 		if(errorCount == 0){
 			putMessage("--------------------");

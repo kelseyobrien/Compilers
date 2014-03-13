@@ -53,13 +53,16 @@ function Lexer(sourceCode)
 				tokenTemp.type = tokenType;
 				tokenTemp.line = currentLine;
 				tokenTemp.value = sourceCode.substr(0, length);
+			break;
 			}
 			
 			//Return array of tokens
 			if(updatedSource.length > 0){
+				putMessage("Found Token :" + token);
 				return new Array(tokenTemp).concat(lex(updatedSource));
 			}
 			else{
+				putMessage("Found Token :" + token);
 				return new Array(tokenTemp);
 			}
 	}	
@@ -75,7 +78,6 @@ function Lexer(sourceCode)
 			var regularExpr = Tokens[token].regex;
 			try{
 				if(regularExpr.test(sourceCode)){
-					putMessage("Found Token :" + token);
 					return token;
 				}
 			}

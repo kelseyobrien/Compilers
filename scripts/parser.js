@@ -332,11 +332,23 @@ function Parser(tokenStream){
 	//Parse boolean expression ( Expr boolop Expr)
 	function boolExpr(){
 		CST.addNode("{", "leaf");
-		AST.addNode(getTokenValue(), "branch");
-		/*var current = tokenStream[0];
-		while(current != T_EQUALITY || current ){
-			
-		}*/
+		
+		var currentExpr = null;
+		i = 0;
+		while (i != -1){
+			currentExpr = tokenStream[i];
+			if (currentExpr.type == T_EQUALITY){
+				AST.addNode("==", "branch");
+				i = -1;
+			}
+			else if(currentExpr.type == T_NOTEQUAL){
+				AST.addNode("!=", "branch");
+				i = -1;
+			}
+			else{
+				i++;
+			}
+		}
 		
 		if(checkToken(T_OPENPAREN) && parseExpr()
 			&& parseBoolOp() && parseExpr() && checkToken(T_CLOSEPAREN)){

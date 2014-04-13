@@ -5,12 +5,15 @@ function Parser(tokenStream){
 	var results = parseProgram();
 	var CST;
 	var AST;
+	var stringBuffer;
 	
 
 	
 	function parseProgram(){
 		CST  = new Tree();
 		AST = new Tree();
+		stringBuffer = "";
+		
 		CST.addNode("Program", "branch");
 		
 		if(!block()){
@@ -114,7 +117,6 @@ function Parser(tokenStream){
 					return true;
 				}
 			}
-			//CST.endChildren();
 		}
 		else{
 			return false;
@@ -124,6 +126,7 @@ function Parser(tokenStream){
 	//Variable declaration -- type Id
 	function varDecl(){
 		CST.addNode("VarDecl", "branch");
+		AST.addNode("VarDecl", "branch");
 		var tokenType = tokenStream[0];
 		var tokenID = tokenStream[1];
 		
@@ -132,6 +135,7 @@ function Parser(tokenStream){
 				putMessage("Redeclaration of Identifier: " + tokenID.value + " at line "+ tokenID.line);
 			}
 			CST.endChildren();
+			AST.endChildren();
 			return true;
 		}
 		else{
@@ -272,16 +276,22 @@ function Parser(tokenStream){
 		var digit = getTokenValue();
 		if (parseDigit(digit)){
 			CST.addNode("digit " + digit, "leaf");
+			/*if(getTokenType() == T_PLUS){
+				AST.addNode("+", "branch");
+			}*/
 			//AST.addNode(digit, "leaf");
-			//Look ahead to see if there is an operator following
+			
 			switch(getTokenType()){
 				case T_PLUS:
-					//AST.addNode("+", "branch");
+					AST.addNode("+", "branch");
+					AST.addNode(digit, "leaf");
 					var success = parseSubIntExpr();
-					//AST.endChildren();
+					AST.endChildren();
 					return success;
 				break;
 			}
+			
+			AST.addNode(digit, "leaf");
 			CST.endChildren();
 			return true;
 		}
@@ -313,7 +323,6 @@ function Parser(tokenStream){
 		}
 		//else boolval
 		else{
-			AST.addNode(getTokenValue(), "leaf");
 			success = boolVal();
 			CST.endChildren();
 			return success;
@@ -323,12 +332,17 @@ function Parser(tokenStream){
 	//Parse boolean expression ( Expr boolop Expr)
 	function boolExpr(){
 		CST.addNode("{", "leaf");
-		//AST.addNode("="
+		AST.addNode(getTokenValue(), "branch");
+		/*var current = tokenStream[0];
+		while(current != T_EQUALITY || current ){
+			
+		}*/
 		
 		if(checkToken(T_OPENPAREN) && parseExpr()
 			&& parseBoolOp() && parseExpr() && checkToken(T_CLOSEPAREN)){
 				CST.addNode("}", "leaf");
 				CST.endChildren();
+				AST.endChildren();
 				return true;
 			}
 		else{
@@ -343,18 +357,14 @@ function Parser(tokenStream){
 			case T_EQUALITY:
 				if(checkToken(T_EQUALITY)){
 					CST.addNode("==", "leaf");
-					AST.addNode("==", "branch");
 					CST.endChildren();
-					AST.endChildren();
 					return true;
 				}
 			break;
 			case T_NOTEQUAL:
 				if(checkToken(T_NOTEQUAL)){
 					CST.addNode("!=", "leaf");
-					AST.addNode("!=", "branch");
 					CST.endChildren();
-					AST.endChildren();
 					return true;
 				}
 			break;
@@ -372,6 +382,7 @@ function Parser(tokenStream){
 				if(checkToken(T_TRUE)){
 					CST.addNode("true", "leaf");
 					CST.endChildren();
+					AST.addNode("true", "leaf");
 					return true;
 				}
 			break;
@@ -379,6 +390,7 @@ function Parser(tokenStream){
 				if(checkToken(T_FALSE)){
 					CST.addNode("false", "leaf");
 					CST.endChildren();
+					AST.addNode("false", "leaf");
 					return true;
 				}
 			default:
@@ -391,8 +403,11 @@ function Parser(tokenStream){
 	//Parse string expression " Charlist "
 	function parseStrExpr(){
 		CST.addNode("StringExpr", "branch");
+		stringBuffer = "";
+		
 		if(parseQuote() && parseCharList() && parseQuote()){
 			CST.endChildren();
+			AST.addNode('"' + stringBuffer + '"', "leaf");
 			return true;
 		}
 		else{
@@ -418,12 +433,12 @@ function Parser(tokenStream){
 	function parseCharList(){
 		CST.addNode("CharList", "branch");
 		var success;
-		var charList = getTokenValue();
+		//var charList = getTokenValue();
 		//If type = character or space try to parse it
 		//If not return true since can go to epsilon
 		switch(getTokenType()){
 			case T_CHAR:
-				if(parseChar(charList)){
+				if(parseChar(true)){
 					success = parseCharList();
 					CST.endChildren();
 					return success;
@@ -433,7 +448,7 @@ function Parser(tokenStream){
 				}
 			break;
 			case T_SPACE:
-				if(parseSpace()){
+				if(parseSpace(true)){
 					CST.addNode("space","leaf");
 					success = parseCharList();
 					CST.endChildren();
@@ -456,6 +471,7 @@ function Parser(tokenStream){
 				if(checkToken(T_INT)){
 					CST.addNode("int", "leaf");
 					CST.endChildren();
+					AST.addNode("int", "leaf");
 					return true;
 				}
 			break;
@@ -463,6 +479,7 @@ function Parser(tokenStream){
 				if(checkToken(T_STRING)){
 					CST.addNode("string", "leaf");
 					CST.endChildren();
+					AST.addNode("string", "leaf");
 					return true;
 				}
 			break;
@@ -470,6 +487,7 @@ function Parser(tokenStream){
 				if(checkToken(T_BOOLEAN)){
 					CST.addNode("boolean", "leaf");
 					CST.endChildren();
+					AST.addNode("boolean", "leaf");
 					return true;
 				}
 			break;
@@ -501,15 +519,23 @@ function Parser(tokenStream){
 				symbolTable.workingScope.usedSymbol(id);
 			}
 		}
+		AST.addNode("Id: " + id, "leaf");
 		success = parseChar(id);
+		CST.addNode("char, " + id, "leaf");
 		CST.endChildren();
 		return success;
 	}
 
 	//Parse char a...z
-	function parseChar(id){
+	function parseChar(buffer){
+		if (buffer) {
+			stringBuffer += getTokenValue();
+		}
+		else {
+			AST.addNode(getTokenValue(), "leaf");
+		}
+		
 		if(checkToken(T_CHAR)){
-			CST.addNode("char, " + id, "leaf");
 			return true;
 		}
 		else{
@@ -520,7 +546,6 @@ function Parser(tokenStream){
 	//Parse digit 0 - 9
 	function parseDigit(digit){
 		if(checkToken(T_DIGIT)){
-			AST.addNode(digit, "leaf");
 			return true;
 		}
 		else{
@@ -535,9 +560,6 @@ function Parser(tokenStream){
 			CST.addNode("intop", "branch");
 			CST.addNode("+", "leaf");
 			CST.endChildren();
-			
-			AST.addNode("+", "branch");
-			//AST.endChildren();
 			return true;
 		}
 		else{
@@ -546,7 +568,13 @@ function Parser(tokenStream){
 	}
 	
 	//Parse space character
-	function parseSpace(){
+	function parseSpace(buffer){
+		if (buffer){
+			stringBuffer += getTokenValue();
+		}
+		else{
+			AST.addNode(getTokenValue(), "leaf");
+		}
 		if(checkToken(T_SPACE)){
 			return true;
 		}

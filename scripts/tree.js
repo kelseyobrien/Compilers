@@ -5,8 +5,8 @@ var Tree = function(){
 	
 	//Add a node to the tree
 	//Type = branch or leaf
-	this.addNode = function(name, type){
-		var node = new Node(name);
+	this.addNode = function(name, type, token){
+		var node = new Node(name, token);
 		
 		//Check to see if root needs to be created
 		if(this.root == null){
@@ -43,11 +43,11 @@ var Tree = function(){
 			}
 			
 			if(node.children === null || node.children.length === 0){
-				result += "[" + node.name + "]";
+				result += "[" + node.name + "] depth: " + depth;
 				result += "\n";
 			}
 			else { //There are children
-				result += "<" + node.name + "> \n";
+				result += "<" + node.name + "> depth: " + depth + "\n";
 				for (var i = 0; i < node.children.length; i++) {
 					traverse(node.children[i], depth + 1);
 				}
@@ -61,9 +61,9 @@ var Tree = function(){
 }
 
 //Single unit in the tree
-var Node = function(name){
+var Node = function(name, token){
 	this.name = name;
-	//this.token = token;
+	this.token = token;
 	this.children = [];
 	this.parent = {};
 	
@@ -74,5 +74,9 @@ var Node = function(name){
 	this.getValue = function(){
 		this.token.value;
 	}*/
+	
+	this.getLine = function(){
+		return this.token.line;
+	}
 }
 

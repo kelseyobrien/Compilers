@@ -4,6 +4,9 @@
     var currentToken = "";
     var errorCount = 0;
     var EOF = "$";
+	var CST;
+	var AST;
+	var SymbolTableList = [];
 
     function init()
     {
@@ -46,26 +49,19 @@
 			putMessage("Parse Started");
 			Parser(tokens);
 		}
+		
+		putMessage("-------------------------");
+		putMessage("Semantic Analysis Started");
+		putMessage("-------------------------");
+		semanticAnalysis();
     }
     
     function putMessage(msg)
     {
         document.getElementById("taOutput").value += msg + "\n";
     }
-    
-    
-    function parse()
-    {
-        putMessage("Parsing [" + tokens + "]");
-        // Grab the next token.
-        currentToken = getNextToken();
-        // A valid parse derives the G(oal) production, so begin there.
-        //parseG();
-        // Report the results.
-        //putMessage("Parsing found " + errorCount + " error(s).");        
-    }
-    
-
+	
+	
     function getNextToken()
     {
         var thisToken = EOF;    // Let's assume that we're at the EOF.

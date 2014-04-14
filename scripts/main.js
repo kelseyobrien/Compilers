@@ -7,6 +7,8 @@
 	var CST;
 	var AST;
 	var SymbolTableList = [];
+	var semanticErrorCount = 0;
+	var parseErrorCount = 0;
 
     function init()
     {
@@ -50,10 +52,15 @@
 			Parser(tokens);
 		}
 		
-		putMessage("-------------------------");
-		putMessage("Semantic Analysis Started");
-		putMessage("-------------------------");
-		semanticAnalysis();
+		if(parseErrorCount == 0){
+			putMessage("Parse Returned");
+			putMessage("-------------------------");
+			putMessage("Semantic Analysis Started");
+			putMessage("-------------------------");
+			while(semanticErrorCount === 0){
+				semanticAnalysis();
+			}
+		}
     }
     
     function putMessage(msg)

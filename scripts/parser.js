@@ -6,7 +6,6 @@ function Parser(tokenStream){
 	//var CST;
 	//var AST;
 	var stringBuffer;
-	var errors;
 	
 	//function
 
@@ -15,7 +14,6 @@ function Parser(tokenStream){
 		CST  = new Tree();
 		AST = new Tree();
 		stringBuffer = "";
-		errors = 0;
 		
 		CST.addNode("Program", "branch", tokenStream[0]);
 		
@@ -26,7 +24,7 @@ function Parser(tokenStream){
 		if(tokenStream.length > 0){
 			if(checkToken(T_EOF)){
 				//Only display CST and AST if parse passes
-				if (errors == 0){
+				if (parseErrorCount == 0){
 					putMessage("----------");
 					putMessage("CST");
 					putMessage("----------");
@@ -408,9 +406,10 @@ function Parser(tokenStream){
 					AST.addNode("false", "leaf", tokenStream[0]);
 					return true;
 				}
+			break;
 			default:
 				putMessage("Error expecting boolean value on line " + getTokenLine());
-				errors++;
+				parseErrorCount++;
 				return false;
 		}
 		return false;
@@ -685,7 +684,8 @@ function Parser(tokenStream){
 	//Handle expected token errors
 	function expectedTokenError(type){
 		//Print error message
-		putMessage("ERROR: Expected: " + type + " Found: " +getTokenType()+" on line " + getTokenLine()); 
+		putMessage("ERROR: Expected: " + type + " Found: " +getTokenType()+" on line " + getTokenLine());
+		parseErrorCount++;
 		moveToNextLine();
 		/*if(tokenStream.length > 0){
 			tokenStream.splice(0,1);

@@ -57,9 +57,9 @@
 			putMessage("-------------------------");
 			putMessage("Semantic Analysis Started");
 			putMessage("-------------------------");
-			while(semanticErrorCount === 0){
+			//while(semanticErrorCount === 0){
 				semanticAnalysis();
-			}
+			//}
 		}
     }
     

@@ -1,6 +1,6 @@
 function ManageScope()
 {
-	this.currentScope = -1;
+	this.currentScope = 0;
 	this.previousScopeList = [];
 	
 	this.initializeNewScope = function(){

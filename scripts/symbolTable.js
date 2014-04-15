@@ -30,6 +30,7 @@
 }*/
 
 function getSymbolTableEntry(id, scope){
+
 	var entry = SymbolTableList[scope][id];
 	
 	if(entry == undefined && scope != 0){

@@ -144,3 +144,9 @@
 	function btnRedecErr(){
 		document.getElementById("taSourceCode").value = "{\n    int a\n    a = 1\n    a = 5 + a\n\n    string a\n}\n$";
 	}
+	function btnSTScope(){
+		document.getElementById("taSourceCode").value = "{\n int a \n a = 1 \n { \n     int a \n     a = 2 \n } \n string b \n b = \"alan\" \n }\n$";
+	}
+	function btnTypeMismatch(){
+		document.getElementById("taSourceCode").value = "{\n string a \n a = \"sflkjsf\" \n { \n while( a != 2 ){ \n     int t \n     t = 6 \n}\n}}$";
+	}

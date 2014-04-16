@@ -14,6 +14,7 @@ function Lexer(sourceCode)
 		
 		if(foundEOF){
 			codeAfterEOF = true;
+			sourceCode = sourceCode.slice(0, x+1);
 		}
 		if(sourceCode.charAt(x) == "$"){
 			foundEOF = true;
@@ -21,7 +22,7 @@ function Lexer(sourceCode)
 	}
 	
 	if(foundEOF && codeAfterEOF){
-		putMessage("Warning: Code found after EOF marker...ignoring");
+		putWarnings("Warning: Code found after EOF marker...ignoring");
 	}
 	
 	//Start lex process

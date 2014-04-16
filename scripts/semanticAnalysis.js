@@ -103,11 +103,17 @@ function semanticAnalysis(){
 						" of type " + getSymbolTableEntry(thisId, scope).type + " on line " + node.children[1].getLine());
 						semanticErrorCount++;
 					}
+					//If id exists but is not initialized display warning
+					else if(getSymbolTableEntry(thisId, scope) && (getSymbolTableEntry(thisId, scope).value == undefined ||
+							getSymbolTableEntry(thisId, scope).value == null)){
+							putWarnings("WARNING: id " + thisId + " is not initialized on line " + node.children[1].getLine());
+					}
 					//Types match
 					else if(symbol.type == getSymbolTableEntry(thisId, scope).type){
 						symbol.value = getSymbolTableEntry(thisId, scope).value;
 						setIdentifierAsUsed(id, scope);
 					}
+					
 				
 				}
 				else{
@@ -121,6 +127,7 @@ function semanticAnalysis(){
 		}
 		else if(node.name == "Print"){
 			var scope = scopeManager.currentScope;
+			//TO DO CHECK FOR BOOLEAN AND +
 			//Check to see if Id
 			if(node.children[0].name.substr(0,2) == "Id"){
 				var id = node.children[0].name.substr(-1);
@@ -141,6 +148,12 @@ function semanticAnalysis(){
 				else{
 					setIdentifierAsUsed(id, scope);
 				}
+			}
+			else if(node.children[0].name == "+"){
+				createSymbolTable(node.children[0]);
+			}
+			else if(node.children[0].name == "==" || node.children[0].name == "!="){
+				createSymbolTable(node.children[0]);
 			}
 		}
 		else if(node.name == "If"){
@@ -172,6 +185,12 @@ function semanticAnalysis(){
 					putMessage("ERROR: id " + id + " on line " + node.getLine() + " is undeclared");
 					semanticErrorCount++;
 				}
+				//Never initialized
+				else if(getSymbolTableEntry(id, scope).value == undefined || 
+						getSymbolTableEntry(id, scope).value == null){
+					putWarnings("WARNING: id " + id + " on line " + node.children[1].getLine() 
+							+ " was never initialized.");	
+				}
 			}
 			//R child is Id but not of type int
 			else if(node.children[1].name.substr(0,2) == "Id"){ 
@@ -186,6 +205,11 @@ function semanticAnalysis(){
 							+ " was never initialized.");	
 				}
 			}
+			//If both integers...proceed
+			else if(R_DIGIT.test(parseInt(node.children[0].name)) && R_DIGIT.test(parseInt(node.children[1].name))){
+				putMessage("Type match: both expressions are integers.");
+			}
+			
 			else {	//Not sure this is necessary but leaving it anyways
 				putMessage("ERROR: can't add non int " + node.children[1].name 
 					+ " on line " + node.children[1].getLine());

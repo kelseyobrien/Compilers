@@ -47,12 +47,14 @@
 			
         // . . . and parse!
 		if(errorCount == 0){
-			putMessage("--------------------");
+			putMessage("-------------------------");
 			putMessage("Parse Started");
+			putMessage("-------------------------");
 			Parser(tokens);
 		}
 		
-		if(parseErrorCount == 0){
+		if(errorCount == 0 && parseErrorCount == 0){
+			putMessage("-------------------------");
 			putMessage("Parse Returned");
 			putMessage("-------------------------");
 			putMessage("Semantic Analysis Started");
@@ -68,6 +70,19 @@
         document.getElementById("taOutput").value += msg + "\n";
     }
 	
+	function putWarnings(msg)
+    {
+        document.getElementById("taWarnings").value += msg + "\n";
+    }
+	
+	function putSymbolTable(msg)
+    {
+        document.getElementById("taSymbolTable").value += msg + "\n";
+    }
+	function putCSTAST(msg)
+    {
+        document.getElementById("taCSTAST").value += msg + "\n";
+    }
 	
     function getNextToken()
     {

@@ -38,7 +38,7 @@ function checkforUnusedVariables(){
 		for(symbol in SymbolTableList[i]){
 			if(SymbolTableList[i][symbol].isUsed == false){
 				var symbolTableEntry = SymbolTableList[i][symbol];
-				putMessage("Warning : variable " + symbol + " on line " +
+				putWarnings("Warning : variable " + symbol + " on line " +
 					symbolTableEntry.line + " is unused");
 			}
 		}

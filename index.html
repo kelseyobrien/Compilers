@@ -8,16 +8,22 @@
 </head>
 <body onload="init();">
     <h1>Senioritis Compiler Project</h1>
-    <p>
-        . . . <em>a simple parser for a simple grammar</em>:
-    </p>
-    <pre>
-G ::== E
-E ::== D O E | D
-D ::== 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0
-O ::== + | -
-    </pre>
+
 	<table>
+		<tr>
+			<td>
+				<h3>Source Code</h3>
+			</td>
+			<td>
+				<h3>Output and Errors</h3>
+			</td>
+			<td>
+				<h3>Click at your own risk.</h3>
+			</td>
+			<td>
+				<h3>Tests</h3>
+			</td>
+		</tr>
 		<tr>
 			<td>
 				<div>
@@ -30,6 +36,11 @@ O ::== + | -
 				</div>
 			</td>
 			<td>
+				<div>
+					<input type="button" id="btnCompile" value="Compile" onclick="btnCompile_click();"/>
+				</div>
+			</td>
+			<td colspan="5">
 				<div>
 					<input type="button" id="btnLexErr" value="Lex Error" onclick="btnLexErr();"/>
 					<input type="button" id="btnDecVar1" value="Variable Declaration" onclick="btnDecVar1();"/>
@@ -45,21 +56,39 @@ O ::== + | -
 		
 				</div>
 			</td>
+			
 		</tr>
-		<tr>
+				<tr>
 			<td>
-				<div>
-					<input type="button" id="btnCompile" value="Compile" onclick="btnCompile_click();"/>
-				</div>
+				<h3>Warnings</h3>
+			</td>
+			<td>
+				<h3>CST and AST</h3>
+			</td>
+			<td>
+				<h3>Symbol Table</h3>
 			</td>
 		</tr>
 		<tr>
-			<td>
+		<td>
 				<div>
-					<img src="images/CompilerPhases.png" alt="Compiler Phases diagram" />
+					<textarea id="taWarnings" cols="50" rows="18"></textarea>
 				</div>
 			</td>
-		<tr>
+			<td>
+			<div>
+					<textarea id="taCSTAST" cols="50" rows="18"></textarea>
+				</div>
+			</td>
+
+			<td>
+				<div>
+					<textarea id="taSymbolTable" cols="50" rows="18"></textarea>
+				</div>
+			</td>
+
+		</tr>
+
     <!-- Client-side code down here, per the YSlow advice. 
     // (http://developer.yahoo.com/performance/rules.html#js_bottom) -->
     <script type="text/javascript" src="scripts/utils.js"></script>	

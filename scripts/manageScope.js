@@ -7,12 +7,12 @@ function ManageScope()
 		this.previousScopeList.push(this.currentScope);
 		var previousScope = this.currentScope;
 		this.currentScope = this.getNextScope();
-		putMessage("Opening scope " + this.currentScope);
+		putMessage("-- Opening scope " + this.currentScope + " --");
 		SymbolTableList[this.currentScope] = {"parentScope": previousScope};
 	}
 	
 	this.leaveCurrentScope = function(){
-		putMessage("Closing scope " + this.currentScope);
+		putMessage("-- Closing scope " + this.currentScope + " --");
 		this.currentScope = this.previousScopeList.pop();
 	}
 

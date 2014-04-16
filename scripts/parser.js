@@ -25,14 +25,14 @@ function Parser(tokenStream){
 			if(checkToken(T_EOF)){
 				//Only display CST and AST if parse passes
 				if (parseErrorCount == 0){
-					putMessage("----------");
-					putMessage("CST");
-					putMessage("----------");
-					putMessage(CST.toString());
-					putMessage("----------");
-					putMessage("AST");
-					putMessage("----------");
-					putMessage(AST.toString());
+					putCSTAST("----------");
+					putCSTAST("CST");
+					putCSTAST("----------");
+					putCSTAST(CST.toString());
+					putCSTAST("----------");
+					putCSTAST("AST");
+					putCSTAST("----------");
+					putCSTAST(AST.toString());
 				}
 				return [true, CST, AST];
 			}
@@ -41,8 +41,8 @@ function Parser(tokenStream){
 			}
 		}
 		else{
-			putMessage("Warning: Program did not end with $.");
-			putMessage("Ignoring...but don't let it happen again.");
+			putWarnings("Warning: Program did not end with $.");
+			putWarnings("Ignoring...but don't let it happen again.");
 		}
 		
 	}

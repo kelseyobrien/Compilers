@@ -86,7 +86,6 @@ function semanticAnalysis(){
 													node.children[1].name == "!=")){
 					createSymbolTable(node.children[1]);
 					var booleanExpr = addBooleanExpr(node.children[1]);
-					alert(booleanExpr);
 					symbol.value = booleanExpr;
 					setIdentifierAsUsed(id, scope);
 				}
@@ -380,25 +379,38 @@ function semanticAnalysis(){
 		var intExpr = parseInt(node.children[0].name);
 		while(node.children[1].name == "+"){
 			node = node.children[1];
-			intExpr = intExpr + parseInt(node.children[0].name);
+			intExpr = parseInt(intExpr) + parseInt(node.children[0].name);
 		}
-		intExpr = intExpr + parseInt(node.children[1].name);
+		var id = node.children[1].name.substr(-1);
+		var scope = scopeManager.currentScope;
 		
-		return intExpr;
+		if(!getSymbolTableEntry(id, scope)){
+			intExpr = parseInt(intExpr) + parseInt(node.children[1].name);
+		}
+		else if(getSymbolTableEntry(id, scope).type != "int"){
+			putMessage("ERROR: type mismatch with "+ id + " of type "
+					+ getSymbolTableEntry(id, scope).type +" on line "+ node.getLine());
+						semanticErrorCount++;
+		}
+		else if(getSymbolTableEntry(id, scope).value == undefined ||
+			getSymbolTableEntry(id, scope).value == null){
+				//Leaving empty so two warnings don't happen for same id
+		}
+		else{
+			intExpr = intExpr + parseInt(getSymbolTableEntry(id, scope).value);
+		}
+		return parseInt(intExpr);
 	}
 	
 	function addBooleanExpr(node){
-		alert(node.name);
 		var boolExpr = "";
 		if((node.children[0].name == "==" || node.children[0].name == "!=")
 			&& (node.children[1].name == "==" || node.children[1].name == "!=")){
-			alert(1);
 			return boolExpr + "(" + addBoolExpr(node.children[0]) + ")" + node.name 
 							+ "(" + addBoolExpr(node.children[1]) + ")";
 			}
 			
 		if(node.children[0].name == "==" || node.children[0].name =="!="){
-			alert(2);
 			return boolExpr + "(" + addBooleanExpr(node.children[0]) + ")" + node.name
 								+ node.children[1].name;
 		}
@@ -412,6 +424,31 @@ function semanticAnalysis(){
 		return boolExpr + node.children[0].name + node.name + node.children[1].name;
 	}
 	
+	function checkForUninitializedVariables(){
+		for(var i = 0; i < SymbolTableList.length; i++){
+			for (symbol in SymbolTableList[i]){
+				if(SymbolTableList[i][symbol].value == undefined 
+					&& symbol !== "parent scope"){
+						var symbolTableEntry = SymbolTableList[i][symbol];
+						putMessage("WARNING : variable " + symbol + " on line " +
+							symbolTableEntry.line + " is uninitialized");
+					}
+			}
+		}
+	}
+
+	function checkforUnusedVariables(){
+		for(var i = 0; i < SymbolTableList.length; i++){
+			for(symbol in SymbolTableList[i]){
+				if(SymbolTableList[i][symbol].isUsed == false){
+					var symbolTableEntry = SymbolTableList[i][symbol];
+					putWarnings("WARNING: variable " + symbol + " on line " +
+						symbolTableEntry.line + " is unused");
+				}
+			}
+		}
+	}
+
 	function printSymbolTable(){
 		for(var i = 0; i < SymbolTableList.length; i++){
 			var currentTable = SymbolTableList[i];

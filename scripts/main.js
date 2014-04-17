@@ -150,3 +150,15 @@
 	function btnTypeMismatch(){
 		document.getElementById("taSourceCode").value = "{\n string a \n a = \"sflkjsf\" \n { \n while( a != 2 ){ \n     int t \n     t = 6 \n}\n}}$";
 	}
+	function btnSATest(){
+		document.getElementById("taSourceCode").value = "{ \nint a \na = 0 \nstring z \nz = \"bond\" \nwhile(a != 9){ \n     if(a != 5){ \n     print(\"bond\") \n}\n{\na = 1 + a \nstring b \nb = \"james bond\" \nprint(b) \n}\n}}$"
+	}
+	function btnDecErr(){
+		document.getElementById("taSourceCode").value ="{\nboolean c\nc = true\nboolean d\nd = (true ==(true == false))\nd = (a == b)\n}$";
+	}
+	function btnBoolExpr(){
+		document.getElementById("taSourceCode").value = "{\nboolean c\nc = true\nboolean d\nd = (1 != 1)\nboolean a\na = (\"string\" == \"string\")\n}$";
+	}
+	function btnNestedIf(){
+		document.getElementById("taSourceCode").value = "{\nboolean d\nif(d == true){\n     int c\n     c = 1\n     if(c == 1){\n          print(\"ugh\")\n} \n} \n}$";
+	}

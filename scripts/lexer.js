@@ -14,7 +14,7 @@ function Lexer(sourceCode)
 		
 		if(foundEOF){
 			codeAfterEOF = true;
-			sourceCode = sourceCode.slice(0, x+1);
+			sourceCode = sourceCode.slice(0, x);
 		}
 		if(sourceCode.charAt(x) == "$"){
 			foundEOF = true;

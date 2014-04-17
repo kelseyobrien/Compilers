@@ -19,28 +19,3 @@ function setIdentifierAsUsed(id, scope){
 		entry.isUsed = true;
 	}
 }
-
-function checkForUninitializedVariables(){
-	for(var i = 0; i < SymbolTableList.length; i++){
-		for (symbol in SymbolTableList[i]){
-			if(SymbolTableList[i][symbol].value == undefined 
-				&& symbol !== "parent scope"){
-					var symbolTableEntry = SymbolTableList[i][symbol];
-					putMessage("Warning : variable " + symbol + " on line " +
-						symbolTableEntry.line + " is uninitialized");
-				}
-		}
-	}
-}
-
-function checkforUnusedVariables(){
-	for(var i = 0; i < SymbolTableList.length; i++){
-		for(symbol in SymbolTableList[i]){
-			if(SymbolTableList[i][symbol].isUsed == false){
-				var symbolTableEntry = SymbolTableList[i][symbol];
-				putWarnings("Warning : variable " + symbol + " on line " +
-					symbolTableEntry.line + " is unused");
-			}
-		}
-	}
-}

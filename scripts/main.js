@@ -4,6 +4,11 @@
     var currentToken = "";
     var errorCount = 0;
     var EOF = "$";
+	var CST;
+	var AST;
+	var SymbolTableList = [];
+	var semanticErrorCount = 0;
+	var parseErrorCount = 0;
 
     function init()
     {
@@ -42,9 +47,21 @@
 			
         // . . . and parse!
 		if(errorCount == 0){
-			putMessage("--------------------");
+			putMessage("-------------------------");
 			putMessage("Parse Started");
+			putMessage("-------------------------");
 			Parser(tokens);
+		}
+		
+		if(errorCount == 0 && parseErrorCount == 0){
+			putMessage("-------------------------");
+			putMessage("Parse Returned");
+			putMessage("-------------------------");
+			putMessage("Semantic Analysis Started");
+			putMessage("-------------------------");
+			//while(semanticErrorCount === 0){
+				semanticAnalysis();
+			//}
 		}
     }
     
@@ -52,20 +69,21 @@
     {
         document.getElementById("taOutput").value += msg + "\n";
     }
-    
-    
-    function parse()
+	
+	function putWarnings(msg)
     {
-        putMessage("Parsing [" + tokens + "]");
-        // Grab the next token.
-        currentToken = getNextToken();
-        // A valid parse derives the G(oal) production, so begin there.
-        //parseG();
-        // Report the results.
-        //putMessage("Parsing found " + errorCount + " error(s).");        
+        document.getElementById("taWarnings").value += msg + "\n";
     }
-    
-
+	
+	function putSymbolTable(msg)
+    {
+        document.getElementById("taSymbolTable").value += msg + "\n";
+    }
+	function putCSTAST(msg)
+    {
+        document.getElementById("taCSTAST").value += msg + "\n";
+    }
+	
     function getNextToken()
     {
         var thisToken = EOF;    // Let's assume that we're at the EOF.
@@ -125,4 +143,22 @@
 	
 	function btnRedecErr(){
 		document.getElementById("taSourceCode").value = "{\n    int a\n    a = 1\n    a = 5 + a\n\n    string a\n}\n$";
+	}
+	function btnSTScope(){
+		document.getElementById("taSourceCode").value = "{\n int a \n a = 1 \n { \n     int a \n     a = 2 \n } \n string b \n b = \"alan\" \n }\n$";
+	}
+	function btnTypeMismatch(){
+		document.getElementById("taSourceCode").value = "{\n string a \n a = \"sflkjsf\" \n { \n while( a != 2 ){ \n     int t \n     t = 6 \n}\n}}$";
+	}
+	function btnSATest(){
+		document.getElementById("taSourceCode").value = "{ \nint a \na = 0 \nstring z \nz = \"bond\" \nwhile(a != 9){ \n     if(a != 5){ \n     print(\"bond\") \n}\n{\na = 1 + a \nstring b \nb = \"james bond\" \nprint(b) \n}\n}}$"
+	}
+	function btnDecErr(){
+		document.getElementById("taSourceCode").value ="{\nboolean c\nc = true\nboolean d\nd = (true ==(true == false))\nd = (a == b)\n}$";
+	}
+	function btnBoolExpr(){
+		document.getElementById("taSourceCode").value = "{\nboolean c\nc = true\nboolean d\nd = (1 != 1)\nboolean a\na = (\"string\" == \"string\")\n}$";
+	}
+	function btnNestedIf(){
+		document.getElementById("taSourceCode").value = "{\nboolean d\nif(d == true){\n     int c\n     c = 1\n     if(c == 1){\n          print(\"ugh\")\n} \n} \n}$";
 	}

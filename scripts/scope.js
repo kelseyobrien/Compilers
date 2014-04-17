@@ -58,6 +58,9 @@ function Scope(parent){
 		if(symbol != false){
 			symbol.used = true;
 		}
+		else{
+			return false;
+		}
 	}
 	
 	//Check to see if object has been initialized
@@ -65,6 +68,9 @@ function Scope(parent){
 		var symbol = this.getSymbol(id, true);
 		if(symbol != false){
 			symbol.initialized = true;
+		}
+		else{
+			return false;
 		}
 	}
 }

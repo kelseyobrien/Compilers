@@ -63,6 +63,10 @@
 				semanticAnalysis();
 			//}
 		}
+		
+		if(errorCount == 0 & parseErrorCount == 0 && semanticErrorCount == 0){
+			codeGen(AST);
+		}
     }
     
     function putMessage(msg)

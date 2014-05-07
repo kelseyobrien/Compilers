@@ -24,4 +24,17 @@ function ManageScope()
 		}
 		return nextScope;
 	}
+	
+	//Same function without the words for codeGen purposes
+	//Kinda cheating
+	this.newScope = function(){
+		this.previousScopeList.push(this.currentScope);
+		var previousScope = this.currentScope;
+		this.currentScope = this.getNextScope();
+		SymbolTableList[this.currentScope] = {"parentScope": previousScope};
+	}
+	
+	this.closeScope = function(){
+		this.currentScope = this.previousScopeList.pop();
+	}
 }

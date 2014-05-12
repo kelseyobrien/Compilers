@@ -3,6 +3,7 @@ function codeGen(AST){
 	 var referenceTable = {};
 	 var jumpTable = {};
 	 var scope = -1;
+	 var stringTable = null;
 	
 	//Initialize ByteCodes
 	/*for(var i = 0; i < 256; i++){
@@ -10,6 +11,16 @@ function codeGen(AST){
 	}*/
 	
 	generateCode(AST);
+	ByteCodes.push("00");
+	
+	for(var i = 0; i < 265; i++){
+		if(ByteCodes[i] == undefined){
+			putCode("00" + " ");
+		}
+		else{
+			putCode(ByteCodes[i] + " ");
+		}
+	}
 	
 	
 	function generateCode(AST){
@@ -37,6 +48,9 @@ function codeGen(AST){
 			case "Print":
 				generatePrint(node);
 			break;
+			case "If":
+				generateIf(node);
+			break;
 		}
 	}
 	
@@ -53,8 +67,9 @@ function codeGen(AST){
 			ByteCodes.push("8D", tempKey, "XX");
 		}
 		else if(type == "string"){
-			//Don't need any bytes but have to make temp table entry
-			getRefTableEntry(id, type, scope);
+			var tempKey = getRefTableEntry(id, type, scope);
+			ByteCodes.push("A9", "00");
+			ByteCodes.push("8D", tempKey, "XX");
 		}
 		
 	}
@@ -86,11 +101,11 @@ function codeGen(AST){
 			var boolVal = getBoolHex(node.children[1], scope);
 			ByteCodes.push("A9", boolVal);
 			ByteCodes.push("8D", tempKey, "00");
-			alert(ByteCodes);
 			
 		}
 		// " Charlist "
 		else if(type === "string"){
+			//NEED TO FIX THIS!!!!!!!!!!!!!!
 			var stringHexList = getStrHex(node.children[1], scope);
 			//Need offset for storage
 			var totalOffset = 0;
@@ -100,69 +115,136 @@ function codeGen(AST){
 					totalOffset += referenceTable[entry]["offset"];
 				}
 			}
+		
+			var openIndex = 256 - totalOffset;
+			
+			var startingIndex = openIndex - stringHexList.length;
+			
+			referenceTable[tempKey]["offset"] = 256 - startingIndex;
+			
+			referenceTable[startingIndex.toString(16).toUpperCase()] = referenceTable[tempKey];
+			
+			delete referenceTable[tempKey];
+			
+			for(var j = 0; j < stringHexList.length; j++){
+					ByteCodes[startingIndex] = stringHexList[j];
+					startingIndex++;
+				}
 		}
-		
-		var openIndex = 256 - totalOffset;
-		
-		var startingIndex = openIndex - stringHexList.length;
-		
-		referenceTable[tempKey]["offset"] = 256 - startingIndex;
-		
-		referenceTable[startingIndex.toString(16).toUpperCase()] = referenceTable[tempKey];
-		
-		delete referenceTable[tempKey];
-		
-		for(var i = 0; i < stringHexList.length; i++){
-			ByteCodes.push("A9", stringHexList[i]);
-			ByteCodes.push("8D", (startingIndex + i).toString(16).toUpperCase(), "00");
-		}
-		alert(ByteCodes);
 		
 	}
 	
 	function generatePrint(node){
 		var value = node.children[0].name;
-		
+		if(R_DIGIT.test(parseInt(value))){
+			ByteCodes.push("A0" , "0" + value);
+			ByteCodes.push("A2", "01");
+		}
 		//Print Id
-		if(value.substr(0,2) == "Id"){
+		else if(value.substr(0,2) == "Id"){
 			var id = value.substr(-1);
 			var type = getSymbolTableEntry(id, scope).type;
+			var tempKey = getRefTableEntry(id, type, scope);
 			
 			if(type == "int" || type == "boolean"){
-				//Get entry in reference table
-				
-				//A2 01
-				//AC <temp value> 00
-				//FF
+				ByteCodes.push("A2", "01");
+				ByteCodes.push("AC", tempKey, "XX");
 			}
 			//String
 			else{
-				//Get entry in reference table
-				
-				//A2 02
-				//A0 <table entry>
-				//FF
+				ByteCodes.push("A2", "02");
+				ByteCodes.push("AC", tempKey, "XX");
 			}
-
 		}
 		else if(value.substr(-1) == '\"'){
-			//Convert string to hex values
-			
-			//A2 02
-			//A0 <load memory location>
-			//FF
-			
-			//Jump past the string
-			//Calculate jump valie
-			//D0 <jump value>
-			//Add ascii character to source code
-		
+			//Remove quotation marks
+			//var string = value.substr(1, value.length - 2);
+			//ByteCodes.push("A0", stringId);
+			//ByteCodes.push("A2" , "02");
 		}
 		//Else intexpr or boolean
-		else{
-			//if integer or operator
+		//CHECK ON 00 00 AFTER 6D AND 8D
+		else if(value == "+"){
+		
+			var valueList = getIntHex(node.children[0], -1);
+			ByteCodes.push("A9", valueList[0]);
+			ByteCodes.push("8D", "00", "00");
+			
+			for(var i = 1; i < valueList.length; i++){
+				ByteCodes.push("A9", valueList[i]);
+				ByteCodes.push("6D", "00", "00");
+				ByteCodes.push("8D", "00", "00");
+			}
+			
+			ByteCodes.push("A2", "01");
+			ByteCodes.push("AC", "00", "00");
 			
 		}
+		else if(value == "true" || value == "false"){
+			var boolVal = getBoolHex(node.children[0], -1);
+			ByteCodes.push("A9", boolVal);
+			ByteCodes.push("8D", "00", "00");
+			ByteCodes.push("A2", "01");
+			ByteCodes.push("AC", "00", "00");
+		}
+		
+		//System call
+		ByteCodes.push("FF");
+	}
+	
+	function generateIf(node){
+		var equalityNode = node.children[0];
+		var blockNode = node.children[1];
+		
+		for(var i = 0; i < 2; i++){
+			if(equalityNode.children[i].name.substr(0,2) == "Id"){
+				var id = equalityNode.children[i].name.substr(-1);
+				var tempKey = getRefTableEntry(id, "don't know", scope);
+				
+				if(i == 0){
+					ByteCodes.push("AE", tempKey, "00");
+				}
+				else{
+					ByteCodes.push("AD", tempKey, "00");
+					ByteCodes.push("8D", "00", "00");
+				}
+			}
+			else {
+				if(R_DIGIT.test(parseInt(equalityNode.children[i].name)) ||
+					equalityNode.children[i].name == "+"){
+					var valueList = getIntHex(equalityNode.children[i]);
+					ByteCodes.push("A9", valueList[0]);
+					ByteCodes.push("8D", "00", "00");
+					
+					for(var x = 1; x < valueList.length; x++){
+						ByteCodes.push("A9", valueList[x]);
+						ByteCodes.push("6D", "00", "00");
+						ByteCodes.push("8D", "00", "00");
+					}
+					
+					if(i == 0){
+						ByteCodes.push("AE", "00", "00");
+					}
+				}
+				/*else if(equalityNode.children[1].name == "true" ||
+						equalityNode.children[1].name == "false"){
+					var boolVal = getBoolHex(equalityNode.children[i]);
+					ByteCodes.push("A9", boolVal);
+					ByteCode.push("8D", "00", "00");
+					
+					if(i == 0){
+						ByteCodes.push("AE", "00", "00");
+					}
+				}*/
+			}
+			
+		}
+		
+		ByteCodes.push("EC", "00", "00");
+		ByteCodes.push("D0", getJumpTableEntry());
+		generateBlock(blockNode);
+		ByteCodes.push("EA");
+		
 	}
 	
 	//Helper functions for reference and jump tables
@@ -202,6 +284,18 @@ function codeGen(AST){
 		}
 	}
 	
+	function getJumpTableEntry(){
+		var entryNum = 0;
+		
+		for(key in jumpTable){
+			entryNum++;
+		}
+		
+		jumpTable["J" + entryNum] = undefined;
+		
+		return "J" + entryNum;
+	}
+	
 	function refEntryExists(id, scope){
 		for(key in referenceTable){
 			if(referenceTable[key].id == id && referenceTable[key].scope === scope){
@@ -221,7 +315,7 @@ function codeGen(AST){
 			function getIntExpr(node){
 				var value = node.name;
 				
-				if(value == "+" || value == "-"){
+				if(value == "+"){
 					hexList.push("0" + node.children[0].name)
 					getIntExpr(node.children[1]);
 				}
@@ -232,13 +326,14 @@ function codeGen(AST){
 				//Id
 				else{
 					//Have to handle if val is another id?
-				
 					var val = getSymbolTableEntry(value.substr(-1), scope).value;
 					hexList.push("0" + val);
 				}
 		
 			}
 	}
+	
+
 	
 	function getBoolHex(node, scope){
 	
@@ -283,8 +378,7 @@ function codeGen(AST){
 		var charList = value.split("");
 		//convert all chars to ascii value
 		for(var i = 0; i < charList.length; i++){
-			charList[i] = charList[i].toUpperCase();
-			charList[i] = charList[i].charCodeAt(0).toString(16);
+			charList[i] = charList[i].charCodeAt(0).toString(16).toUpperCase();
 		}
 		
 		//Add 00 to make it a null terminated string
@@ -292,5 +386,19 @@ function codeGen(AST){
 
 		return charList;
 	}
+	
+	function allocateString(string){
+		var length = string.length + 1;
+		
+		var record = {
+			id : stringId,
+			length : length,
+			string : string
+			}
+			
+		stringTable.push(record);
+		
+	}
+	
 	
 }

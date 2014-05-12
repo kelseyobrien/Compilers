@@ -88,6 +88,10 @@
         document.getElementById("taCSTAST").value += msg + "\n";
     }
 	
+	function putCode(msg){
+		document.getElementById("taCode").value += msg;
+	}
+	
     function getNextToken()
     {
         var thisToken = EOF;    // Let's assume that we're at the EOF.

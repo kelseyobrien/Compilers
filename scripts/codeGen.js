@@ -201,54 +201,113 @@ function codeGen(AST){
 		var blockNode = node.children[1];
 		var scope = node.children[1].scope;
 		
-		for(var i = 0; i < 2; i++){
-			if(equalityNode.children[i].name.substr(0,2) == "Id"){
-				var id = equalityNode.children[i].name.substr(-1);
-				var tempKey = getRefTableEntry(id, "don't know", scope);
-				
-				if(i == 0){
-					ByteCodes.push("AE", tempKey, "00");
+		//Get values of both conditions
+		var values = [];
+			for(var i = 0; i < 2; i++){
+				if(equalityNode.children[i].name.substr(0,2) == "Id"){
+					var id = equalityNode.children[i].name.substr(-1);
+					var scope = equalityNode.children[i].scope;
+					var value = getSymbolTableEntry(id, scope).value;
+					values[i] = value;
 				}
-				else{
-					ByteCodes.push("AD", tempKey, "00");
-					ByteCodes.push("8D", "00", "00");
-				}
-			}
-			else {
-				if(R_DIGIT.test(parseInt(equalityNode.children[i].name)) ||
-					equalityNode.children[i].name == "+"){
-					var valueList = getIntHex(equalityNode.children[i]);
-					ByteCodes.push("A9", valueList[0]);
-					ByteCodes.push("8D", "00", "00");
-					
-					for(var x = 1; x < valueList.length; x++){
-						ByteCodes.push("A9", valueList[x]);
-						ByteCodes.push("6D", "00", "00");
-						ByteCodes.push("8D", "00", "00");
+				else {
+					if(R_DIGIT.test(parseInt(equalityNode.children[i].name))){
+						
+						values[i] = equalityNode.children[i].name;
 					}
-					
-					if(i == 0){
-						ByteCodes.push("AE", "00", "00");
-					}
-				}
-				else if(equalityNode.children[i].name == "true" ||
-						equalityNode.children[i].name == "false"){
-					var boolVal = getBoolHex(equalityNode.children[i]);
-					ByteCodes.push("A9", boolVal);
-					ByteCodes.push("8D", "00", "00");
-					
-					if(i == 0){
-						ByteCodes.push("AE", "00", "00");
+					else if(equalityNode.children[i].name == "true" ||
+							equalityNode.children[i].name == "false"){
+						values[i] = equalityNode.children[i].name;
 					}
 				}
 			}
 			
-		}
+			var equality = false;
+			if(values[0] == values[1]){
+				equality = true;
+			}
 		
-		ByteCodes.push("EC", "00", "00");
-		ByteCodes.push("D0", getJumpTableEntry());
-		generateBlock(blockNode);
-		ByteCodes.push("EA");
+		//If boolean operation is ==
+		if (equalityNode.name == "=="){
+			for(var i = 0; i < 2; i++){
+				if(equalityNode.children[i].name.substr(0,2) == "Id"){
+					var id = equalityNode.children[i].name.substr(-1);
+					var tempKey = getRefTableEntry(id, "don't know", scope);
+					
+					if(i == 0){
+						ByteCodes.push("AE", tempKey, "00");
+					}
+					else{
+						ByteCodes.push("AD", tempKey, "00");
+						ByteCodes.push("8D", "00", "00");
+					}
+				}
+				else {
+					if(R_DIGIT.test(parseInt(equalityNode.children[i].name)) ||
+						equalityNode.children[i].name == "+"){
+						var valueList = getIntHex(equalityNode.children[i]);
+						ByteCodes.push("A9", valueList[0]);
+						ByteCodes.push("8D", "00", "00");
+						
+						for(var x = 1; x < valueList.length; x++){
+							ByteCodes.push("A9", valueList[x]);
+							ByteCodes.push("6D", "00", "00");
+							ByteCodes.push("8D", "00", "00");
+						}
+						
+						if(i == 0){
+							ByteCodes.push("AE", "00", "00");
+						}
+					}
+					else if(equalityNode.children[i].name == "true" ||
+							equalityNode.children[i].name == "false"){
+						var boolVal = getBoolHex(equalityNode.children[i]);
+						ByteCodes.push("A9", boolVal);
+						ByteCodes.push("8D", "00", "00");
+						
+						if(i == 0){
+							ByteCodes.push("AE", "00", "00");
+						}
+					}
+				}
+				
+			}
+			
+			ByteCodes.push("EC", "00", "00");
+			ByteCodes.push("D0", getJumpTableEntry());
+			generateBlock(blockNode);
+			ByteCodes.push("EA");
+		}
+		//Boolean operation is != and the values are different
+		else if (equalityNode.name == "!="){
+			if(equality == false){
+				alert("in");
+				//Load same values
+				ByteCodes.push("A9", "02");
+				ByteCodes.push("8D", "00", "00");
+				ByteCodes.push("AE", "00", "00");
+				ByteCodes.push("A9", "02");
+				ByteCodes.push("8D", "00", "00");
+				ByteCodes.push("EC", "00", "00");
+				ByteCodes.push("D0", getJumpTableEntry());
+				generateBlock(blockNode);
+				ByteCodes.push("EA");
+			}
+			else{
+				alert("in");
+				//Load same values
+				ByteCodes.push("A9", "02");
+				ByteCodes.push("8D", "00", "00");
+				ByteCodes.push("AE", "00", "00");
+				ByteCodes.push("A9", "03");
+				ByteCodes.push("8D", "00", "00");
+				ByteCodes.push("EC", "00", "00");
+				ByteCodes.push("D0", getJumpTableEntry());
+				generateBlock(blockNode);
+				ByteCodes.push("EA");
+			}
+			
+		}
 		
 	}
 	

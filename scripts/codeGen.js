@@ -8,6 +8,7 @@ function codeGen(AST){
 	ByteCodes.push("00");
 	
 	referenceBackpatch();
+	jumpBackpatch();
 	
 	for(var i = 0; i < 255; i++){
 		if(ByteCodes[i] == undefined){
@@ -99,7 +100,7 @@ function codeGen(AST){
 		//Can be ( expr boolop expr)
 		//or just boolval
 		else if(type === "boolean"){
-			var boolVal = getBoolHex(node.children[1], scope);
+			var boolVal = getBoolHex(node.children[1], node.children[1].scope);
 			ByteCodes.push("A9", boolVal);
 			ByteCodes.push("8D", tempKey, "00");
 			
@@ -230,16 +231,16 @@ function codeGen(AST){
 						ByteCodes.push("AE", "00", "00");
 					}
 				}
-				/*else if(equalityNode.children[1].name == "true" ||
-						equalityNode.children[1].name == "false"){
+				else if(equalityNode.children[i].name == "true" ||
+						equalityNode.children[i].name == "false"){
 					var boolVal = getBoolHex(equalityNode.children[i]);
 					ByteCodes.push("A9", boolVal);
-					ByteCode.push("8D", "00", "00");
+					ByteCodes.push("8D", "00", "00");
 					
 					if(i == 0){
 						ByteCodes.push("AE", "00", "00");
 					}
-				}*/
+				}
 			}
 			
 		}
@@ -431,6 +432,28 @@ function codeGen(AST){
 			}
 			
 			delete referenceTable[key];
+		}
+	}
+	
+	function jumpBackpatch(){
+		for(key in jumpTable){
+			for(var i = 0; i < ByteCodes.length; i++){
+				if(ByteCodes[i] == key){
+					var start = i;
+				}
+				if(ByteCodes[i] == "EA"){
+					var destination = i;
+				}
+			}
+			var jumpDist = (destination - start).toString(16).toUpperCase();
+			
+			if(jumpDist.length == 1){
+				jumpDist = "0" + jumpDist;
+			}
+			
+			ByteCodes.splice(start, 1, jumpDist);
+			
+			delete jumpTable[key];
 		}
 	}
 	

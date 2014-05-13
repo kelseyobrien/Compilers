@@ -66,7 +66,7 @@ var Node = function(name, token){
 	this.token = token;
 	this.children = [];
 	this.parent = {};
-	
+	this.scope = 0;
 	/*this.getType = function(){
 		return this.token.type;
 	}
@@ -77,6 +77,13 @@ var Node = function(name, token){
 	
 	this.getLine = function(){
 		return this.token.line;
+	}
+	this.setScope = function(scope){
+		this.scope = scope
+	}
+	
+	this.getScope = function(){
+		return this.scope;
 	}
 }
 

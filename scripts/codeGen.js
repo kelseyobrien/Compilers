@@ -2,18 +2,14 @@ function codeGen(AST){
 	 var ByteCodes = [];
 	 var referenceTable = {};
 	 var jumpTable = {};
-	 var scope = -1;
 	 var stringTable = null;
-	
-	//Initialize ByteCodes
-	/*for(var i = 0; i < 256; i++){
-		ByteCodes[i] = "00";
-	}*/
 	
 	generateCode(AST);
 	ByteCodes.push("00");
 	
-	for(var i = 0; i < 265; i++){
+	referenceBackpatch();
+	
+	for(var i = 0; i < 255; i++){
 		if(ByteCodes[i] == undefined){
 			putCode("00" + " ");
 		}
@@ -28,12 +24,14 @@ function codeGen(AST){
 	}
 	
 	function generateBlock(node){
-		//Be careful with this
-		scope++;
 		for(var i = 0; i < node.children.length; i++){
-			generateStatement(node.children[i]);
+			if(node.children[i].name == "Block"){
+				generateBlock(node.children[i]);
+			}
+			else{
+				generateStatement(node.children[i]);
+			}
 		}
-		scope--;
 	}
 	
 	function generateStatement(node){
@@ -57,7 +55,7 @@ function codeGen(AST){
 	function generateVarDecl(node){
 		var type = node.children[0].name;
 		var id = node.children[1].name.substr(-1);
-		
+		var scope = node.children[1].scope;
 		if(type == "int" || type == "boolean"){
 			//Int and boolean declarations are the same
 			//Add A9 00
@@ -75,7 +73,10 @@ function codeGen(AST){
 	}
 	
 	function generateAssignment(node){
+		alert(node.children[0].name);
 		var id = node.children[0].name.substr(-1);
+		var scope = node.children[0].scope;
+	
 		var value = node.children[1].name;
 		var type = getSymbolTableEntry(id, scope).type;
 		
@@ -105,23 +106,23 @@ function codeGen(AST){
 		}
 		// " Charlist "
 		else if(type === "string"){
-			//NEED TO FIX THIS!!!!!!!!!!!!!!
 			var stringHexList = getStrHex(node.children[1], scope);
 			//Need offset for storage
 			var totalOffset = 0;
 			
+			//Make sure not to cover up existing values
 			for(entry in referenceTable){
 				if(referenceTable[entry]["type"] == "string" && referenceTable[entry]["offset"] != undefined){
 					totalOffset += referenceTable[entry]["offset"];
 				}
 			}
 		
-			var openIndex = 256 - totalOffset;
 			
-			var startingIndex = openIndex - stringHexList.length;
+			var startingIndex = 256 - totalOffset - stringHexList.length;
 			
 			referenceTable[tempKey]["offset"] = 256 - startingIndex;
 			
+			//Not sure if this is necessary
 			referenceTable[startingIndex.toString(16).toUpperCase()] = referenceTable[tempKey];
 			
 			delete referenceTable[tempKey];
@@ -143,6 +144,8 @@ function codeGen(AST){
 		//Print Id
 		else if(value.substr(0,2) == "Id"){
 			var id = value.substr(-1);
+			var scope = node.children[0].scope;
+			alert(scope);
 			var type = getSymbolTableEntry(id, scope).type;
 			var tempKey = getRefTableEntry(id, type, scope);
 			
@@ -195,6 +198,7 @@ function codeGen(AST){
 	function generateIf(node){
 		var equalityNode = node.children[0];
 		var blockNode = node.children[1];
+		var scope = node.children[1].scope;
 		
 		for(var i = 0; i < 2; i++){
 			if(equalityNode.children[i].name.substr(0,2) == "Id"){
@@ -273,6 +277,8 @@ function codeGen(AST){
 						offset++;
 					}
 				}
+				
+				offset++;
 			}
 			else if(type == "string"){
 				var offset = undefined;
@@ -297,6 +303,7 @@ function codeGen(AST){
 	}
 	
 	function refEntryExists(id, scope){
+		
 		for(key in referenceTable){
 			if(referenceTable[key].id == id && referenceTable[key].scope === scope){
 				return true;
@@ -306,27 +313,34 @@ function codeGen(AST){
 	}
 	
 	function getIntHex(node, scope){
+		
 		var hexList = [];
+		//var scope = node.children[1].name.charAt(2);
 		
 		getIntExpr(node);
 		
 		return hexList;
 		
 			function getIntExpr(node){
-				var value = node.name;
+				var intVal = node.name;
 				
-				if(value == "+"){
+				if(intVal == "+"){
 					hexList.push("0" + node.children[0].name)
 					getIntExpr(node.children[1]);
 				}
 				//Int
-				else if(R_DIGIT.test(parseInt(value))){
-					hexList.push("0" + value);
+				else if(R_DIGIT.test(parseInt(intVal))){
+					hexList.push("0" + intVal);
 				}
 				//Id
 				else{
 					//Have to handle if val is another id?
-					var val = getSymbolTableEntry(value.substr(-1), scope).value;
+					var scope = node.scope;
+					alert(scope);
+					var val = getSymbolTableEntry(intVal.substr(-1), scope).value;
+					if(val == undefined){
+						val = 0;
+					}
 					hexList.push("0" + val);
 				}
 		
@@ -398,6 +412,26 @@ function codeGen(AST){
 			
 		stringTable.push(record);
 		
+	}
+	
+	function referenceBackpatch(){
+		for(key in referenceTable){
+			var location = (referenceTable[key].offset + ByteCodes.length - 1).toString(16).toUpperCase();
+			
+			//Make sure location is 2 hex digits
+			if(location.length == 1){
+				location = "0" + location;
+			}
+			
+			for(var i = 0; i < ByteCodes.length; i++){
+				if(ByteCodes[i] == key){
+					ByteCodes.splice(i, 1, location);
+					ByteCodes.splice(i + 1, 1, "00");
+				}
+			}
+			
+			delete referenceTable[key];
+		}
 	}
 	
 	

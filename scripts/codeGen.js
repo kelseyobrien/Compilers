@@ -50,6 +50,9 @@ function codeGen(AST){
 			case "If":
 				generateIf(node);
 			break;
+			case "While":
+				generateWhile(node);
+			break;
 		}
 	}
 	
@@ -74,7 +77,6 @@ function codeGen(AST){
 	}
 	
 	function generateAssignment(node){
-		alert(node.children[0].name);
 		var id = node.children[0].name.substr(-1);
 		var scope = node.children[0].scope;
 	
@@ -146,7 +148,6 @@ function codeGen(AST){
 		else if(value.substr(0,2) == "Id"){
 			var id = value.substr(-1);
 			var scope = node.children[0].scope;
-			alert(scope);
 			var type = getSymbolTableEntry(id, scope).type;
 			var tempKey = getRefTableEntry(id, type, scope);
 			
@@ -162,9 +163,33 @@ function codeGen(AST){
 		}
 		else if(value.substr(-1) == '\"'){
 			//Remove quotation marks
-			//var string = value.substr(1, value.length - 2);
-			//ByteCodes.push("A0", stringId);
-			//ByteCodes.push("A2" , "02");
+			var string = value.substr(1, value.length - 2);
+			var totalOffset = 0;
+			
+			//Get offset in order not to cover other things
+			for(entry in referenceTable){
+				if(referenceTable[entry]["type"] == "string" && referenceTable[entry]["offset"] != undefined){
+					totalOffset += referenceTable[entry]["offset"];
+				}
+			}
+			
+			var startingIndex = 256 - totalOffset - string.length - 1;
+			
+			ByteCodes.push("A2", "02");
+			ByteCodes.push("A0", startingIndex.toString(16).toUpperCase());
+			ByteCodes.push("FF");
+			
+			for(var j = 0; j <= string.length; j++){
+					if(j == string.length){
+						ByteCodes[startingIndex] = "00";
+					}
+					else{
+						ByteCodes[startingIndex] = string.charCodeAt(j).toString(16).toUpperCase();
+						startingIndex++;
+					}	
+			}
+			
+			getRefTableEntry(string, "print string", -1);
 		}
 		//Else intexpr or boolean
 		//CHECK ON 00 00 AFTER 6D AND 8D
@@ -281,7 +306,6 @@ function codeGen(AST){
 		//Boolean operation is != and the values are different
 		else if (equalityNode.name == "!="){
 			if(equality == false){
-				alert("in");
 				//Load same values
 				ByteCodes.push("A9", "02");
 				ByteCodes.push("8D", "00", "00");
@@ -294,7 +318,6 @@ function codeGen(AST){
 				ByteCodes.push("EA");
 			}
 			else{
-				alert("in");
 				//Load same values
 				ByteCodes.push("A9", "02");
 				ByteCodes.push("8D", "00", "00");
@@ -311,44 +334,110 @@ function codeGen(AST){
 		
 	}
 	
+	function generateWhile(node){
+		var equalityNode = node.children[0];
+		var blockNode	 = node.children[1];
+
+		var conditionStartLoc = ByteCodes.length;
+		
+		for(var i = 0; i < 2; i++){
+			//Child is id
+			if(equalityNode.children[i].name.substr(0, 2) == "Id"){
+				var id = equalityNode.children[i].name.substr(-1);
+				var scope = equalityNode.children[i].scope
+				var type = getSymbolTableEntry(id, scope).type;
+				var tempKey = getRefTableEntry(id, type, scope);
+				
+				if(i == 0)
+				{
+					ByteCodes.push("AE", tempKey, "00");
+				}
+				else{
+					ByteCodes.push("AD", tempKey, "00");
+				}
+			}
+			else {
+					if(R_DIGIT.test(parseInt(equalityNode.children[i].name)) ||
+						equalityNode.children[i].name == "+"){
+							var valueList = getIntHex(equalityNode.children[i]);
+							ByteCodes.push("A9", valueList[0]);
+							ByteCodes.push("8D", "00", "00");
+							
+							for(var x = 1; x < valueList.length; x++){
+								ByteCodes.push("A9", valueList[x]);
+								ByteCodes.push("6D", "00", "00");
+								ByteCodes.push("8D", "00", "00");
+							}
+							
+							if(i == 0){
+								ByteCodes.push("AE", "00", "00");
+							}
+						}
+						
+					else if(equalityNode.children[i].name == "true" ||
+							equalityNode.children[i].name == "false"){
+								var boolVal = getBoolHex(equalityNode.children[i]);
+								ByteCodes.push("A9", boolVal);
+								ByteCodes.push("8D", "00", "00");
+						
+								if(i == 0){
+									ByteCodes.push("AE", "00", "00");
+								}
+						}
+				}
+		}
+		
+		ByteCodes.push("EC", "00", "00");
+		ByteCodes.push("D0", getJumpTableEntry());
+		generateBlock(blockNode);
+		
+		//Need to handle false comparison
+		//Get location of jump value
+		//Calc jump back
+		
+		
+		
+	}
+	
 	//Helper functions for reference and jump tables
 	
 	function getRefTableEntry(id, type, scope){
-		
-		if(refEntryExists(id, scope)){
-			for(key in referenceTable){
-				if(referenceTable[key].id == id && referenceTable[key].scope === scope){
-					return key
-				}
-			}
-		}
-		else{
-			var entryNum = 0;
-			for(key in referenceTable){
-				entryNum++;
-			}
-			
-			//Need to determine offset by type
-			if(type == "int" || type == "boolean"){
-				var offset = 0;
-				
+
+			if(refEntryExists(id, scope)){
 				for(key in referenceTable){
-					if(referenceTable[key].type != "string"){
-						offset++;
+					if(referenceTable[key].id == id && referenceTable[key].scope === scope){
+						return key
 					}
 				}
+			}
+			else{
+				var entryNum = 0;
+				for(key in referenceTable){
+					entryNum++;
+				}
 				
-				offset++;
+				//Need to determine offset by type
+				if(type == "int" || type == "boolean"){
+					var offset = 0;
+					
+					for(key in referenceTable){
+						if(referenceTable[key].type != "string"){
+							offset++;
+						}
+					}
+					
+					offset++;
+				}
+				else if(type == "string"){
+					var offset = undefined;
+				}
+				
+				referenceTable["T" + entryNum] = {"id": id, "type": type, "scope": scope, "offset": offset};
+				
+				return "T" + entryNum;
 			}
-			else if(type == "string"){
-				var offset = undefined;
-			}
-			
-			referenceTable["T" + entryNum] = {"id": id, "type": type, "scope": scope, "offset": offset};
-			
-			return "T" + entryNum;
-		}
 	}
+	
 	
 	function getJumpTableEntry(){
 		var entryNum = 0;
@@ -396,7 +485,6 @@ function codeGen(AST){
 				else{
 					//Have to handle if val is another id?
 					var scope = node.scope;
-					alert(scope);
 					var val = getSymbolTableEntry(intVal.substr(-1), scope).value;
 					if(val == undefined){
 						val = 0;
@@ -482,6 +570,7 @@ function codeGen(AST){
 			if(location.length == 1){
 				location = "0" + location;
 			}
+			
 			
 			for(var i = 0; i < ByteCodes.length; i++){
 				if(ByteCodes[i] == key){

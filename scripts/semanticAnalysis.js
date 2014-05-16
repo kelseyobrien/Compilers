@@ -29,6 +29,7 @@ function semanticAnalysis(){
 			var line = node.children[1].getLine();
 			
 			var scope = scopeManager.currentScope;
+			node.children[1].setScope(scope);
 			
 			//Check for redeclaration in current scope
 			putMessage("SCOPE: Checking for redeclaration of id " + id + " in current scope.");

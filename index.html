@@ -8,7 +8,9 @@
 </head>
 <body onload="init();">
     <h1>Senioritis Compiler Project</h1>
-
+	<div>
+			<input type="button" id="btnCompile" value="Compile" onclick="btnCompile_click();"/>
+	</div>
 	<table>
 		<tr>
 			<td>
@@ -18,7 +20,7 @@
 				<h3>Output and Errors</h3>
 			</td>
 			<td>
-				<h3>Click at your own risk.</h3>
+				<h3>Warnings</h3>
 			</td>
 			<td>
 				<h3>Tests</h3>
@@ -37,7 +39,7 @@
 			</td>
 			<td>
 				<div>
-					<input type="button" id="btnCompile" value="Compile" onclick="btnCompile_click();"/>
+					<textarea id="taWarnings" cols="50" rows="18"></textarea>
 				</div>
 			</td>
 			<td colspan="5">
@@ -59,13 +61,17 @@
 					<input type="button" id="btnDecErr" value="Declaration Error" onclick="btnDecErr();"/>
 					<input type="button" id="btnBoolAssign" value="Boolean Assignment" onclick="btnBoolExpr();"/>
 					<input type="button" id="btnNestedIf" value="Nested If" onclick="btnNestedIf();"/>
+					<input type="button" id="btnGoodTest1" value="Code Gen Good Test 1" onclick="btnGoodTest1();"/>
+					<input type="button" id="btnGoodTest2" value="Code Gen Good Test 2" onclick="btnGoodTest2();"/>
+					<input type="button" id="btnGoodTest3" value="Code Gen Good Test 3" onclick="btnGoodTest3();"/>
+					<input type="button" id="btnGoodTest4" value="Code Gen Good Test 4" onclick="btnGoodTest4();"/>
 				</div>
 			</td>
 			
 		</tr>
 				<tr>
 			<td>
-				<h3>Warnings</h3>
+				<h3>Generated Code</h3>
 			</td>
 			<td>
 				<h3>CST and AST</h3>
@@ -77,7 +83,7 @@
 		<tr>
 		<td>
 				<div>
-					<textarea id="taWarnings" cols="50" rows="18"></textarea>
+					<textarea id="taCode" cols="50" rows="18"></textarea>
 				</div>
 			</td>
 			<td>
@@ -107,5 +113,6 @@
 	<script type="text/javascript" src="scripts/tree.js"></script>
 	<script type="text/javascript" src="scripts/semanticAnalysis.js"></script>
 	<script type="text/javascript" src="scripts/manageScope.js"></script>
+	<script type="text/javascript" src="scripts/codeGen.js"></script>
 </body>
 </html>

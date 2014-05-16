@@ -63,6 +63,10 @@
 				semanticAnalysis();
 			//}
 		}
+		
+		if(errorCount == 0 & parseErrorCount == 0 && semanticErrorCount == 0){
+			codeGen(AST);
+		}
     }
     
     function putMessage(msg)
@@ -83,6 +87,10 @@
     {
         document.getElementById("taCSTAST").value += msg + "\n";
     }
+	
+	function putCode(msg){
+		document.getElementById("taCode").value += msg;
+	}
 	
     function getNextToken()
     {
@@ -161,4 +169,20 @@
 	}
 	function btnNestedIf(){
 		document.getElementById("taSourceCode").value = "{\nboolean d\nif(d == true){\n     int c\n     c = 1\n     if(c == 1){\n          print(\"ugh\")\n} \n} \n}$";
+	}
+	
+	function btnGoodTest1(){
+		document.getElementById("taSourceCode").value = "{ \n int a\n a = 0\nif(a == 0){\nprint(a)\n}\n}\n$";
+	}
+	
+	function btnGoodTest2(){
+		document.getElementById("taSourceCode").value = "{\nprint(\"sdlkfjslkfdjdslk\")\n}$";
+	}
+	
+	function btnGoodTest3(){
+		document.getElementById("taSourceCode").value = "{\nint a\nint b\nb = 2\na = 3 + b\nprint(a)\n}$";
+	}
+	
+	function btnGoodTest4(){
+		document.getElementById("taSourceCode").value = "{\nboolean b\nb = true\nboolean a\na = false\nif(a != b){\nprint(a)\nprint(b)\n}\n}$";
 	}
